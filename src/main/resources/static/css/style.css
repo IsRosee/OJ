@@ -1,0 +1,12 @@
+.preview-img {
+    max-width: 300px;
+    max-height: 300px;
+}
+
+.preview-audio {
+    max-width: 300px;
+}
+
+.preview-video {
+    max-width: 300px;
+}

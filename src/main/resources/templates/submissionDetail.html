@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验问题平台首页</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/all.min.css}" rel="stylesheet">
+    <link th:href="@{/css/nav.css}" rel="stylesheet">
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+    <style>
+        .navbar-nav a {
+            margin-right: 15px;
+        }
+
+        .experiment-item {
+            transition: background-color 0.3s;
+        }
+
+        .experiment-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .notification {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 页首 -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <!--    logo-->
+    <img src="/img/logo.jpg" alt="logo" style="width: 50px; height: 50px;">
+    <a class="navbar-brand" href="#">实验平台</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto" id="navItems">
+            <li class="nav-item">
+                <a class="nav-link" href="/index">首页</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/experiment">实验问题</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/notification">课程通知</a>
+            </li>
+            <li class="nav-item" id = "testNavItem">
+                <a class="nav-link" href="/test">自测题库</a>
+            </li>
+            <li class="nav-item" id="loginNavItem">
+                <a class="nav-link" href="/login">注册登录</a>
+            </li>
+
+            <!--            <li class="nav-item" id="searchNavItem">-->
+            <!--                <form class="form-inline" th:action="@{/search}" method="get">-->
+            <!--                    <input class="form-control mr-sm-2" type="search" placeholder="搜索" aria-label="搜索" name="query">-->
+            <!--                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜索</button>-->
+            <!--                </form>-->
+            <!--            </li>-->
+        </ul>
+    </div>
+</nav>
+
+<!-- 内容 -->
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>实验提交详情</h2>
+            <div id="submission-details">
+                <!-- 实验详情内容将被插入到这里 -->
+            </div>
+            <button id="delete-submission" class="btn btn-danger mt-3">删除提交</button>
+
+            <h3 class="mt-4">相关媒体内容</h3>
+            <div id="submission-media">
+                <!-- 实验媒体内容将被插入到这里 -->
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<!-- 页脚 -->
+<footer class="bg-light text-center text-lg-start mt-5">
+    <div class="text-center p-3">
+        © 2024 实验平台. 保留所有权利.
+    </div>
+</footer>
+
+<!-- 动态提示框 -->
+<div class="notification" id="notification">
+    有新的课程通知或实验问题更新！
+</div>
+
+<script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+<script th:src="@{/js/popper.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/showUser.js}">
+</script>
+<script>
+    const submissionId = window.location.pathname.split('/').pop();
+    $(document).ready(function () {
+        //获取localsotrage中的role
+        const role = localStorage.getItem('role');
+        if (role === 'STUDENT') {
+            $('#delete-submission').hide();
+        }
+        // 实现/api/experiments/{id}接口和/api/experiments/{id}/media 返回数据查看
+        // 发送 AJAX 请求获取实验详情
+        $.ajax({
+            url: `/api/submissions/${submissionId}`,
+            method: 'GET',
+            success: function (response) {
+                const submission = response;
+                console.log(submission);
+                //     private long id;
+                // private long experimentId;
+                // private long studentId;
+                // private String answer;
+                // private LocalDateTime submittedAt;
+                //     private String status;
+                $('#submission-details').html(`
+                    <p><strong>提交ID：</strong> ${submission.id}</p>
+                    <p><strong>实验ID：</strong> ${submission.experimentId}</p>
+                    <p><strong>学生ID：</strong> ${submission.studentId}</p>
+                    <p><strong>提交内容：</strong> <li class="list-group-item">${submission.answer}</li></p>
+                    <p><strong>提交时间：</strong> ${new Date(submission.submittedAt).toLocaleString()}</p>
+                    <p><strong>状态：</strong> ${submission.status}</p>
+                `);
+            },
+            error: function (xhr, status, error) {
+                $('#submission-details').html('<p class="text-danger">无法获取实验详情。</p>');
+            }
+        });
+
+        // 发送 AJAX 请求获取实验媒体
+        $.ajax({
+            url: `/api/submissions/${submissionId}/media`,
+            method: 'GET',
+            success: function (response) {
+                const mediaList = response;
+                console.log(mediaList);
+                // 预览URL为http://localhost:8080/+mediaUrl
+                if (mediaList.length > 0) {
+                    let mediaHtml = '<ul class="list-group">';
+                    mediaList.forEach(media => {
+                        mediaHtml += `
+                            <li class="list-group-item">
+                                <p><strong>媒体类型：</strong> ${media.mediaType}</p>
+                                <p><strong>媒体下载：</strong>
+                                    <a href="http://localhost:8080/${media.mediaUrl}" target="_blank">${media.mediaUrl}</a>
+                                <p><strong>排序：</strong> ${media.sortOrder}</p>
+                                <p><strong>创建时间：</strong> ${new Date(media.createdAt).toLocaleString()}</p>
+                        `;
+                        if (media.mediaType.startsWith('image/')) {
+                            mediaHtml += `<p><strong>预览：</strong></p>
+        <img src="http://localhost:8080/${media.mediaUrl}" alt="Image" class="preview-img">
+    </li>`;
+                        } else if (media.mediaType.startsWith('audio/')) {
+                            mediaHtml += `<p><strong>预览：</strong></p>
+        <audio controls class="preview-audio">
+            <source src="http://localhost:8080/${media.mediaUrl}" type="audio/mp3">
+        </audio>
+       </li>`;
+                        } else if (media.mediaType.startsWith('video/')) {
+                            mediaHtml += `<p><strong>预览：</strong></p>
+        <video controls class="preview-video">
+            <source src="http://localhost:8080/${media.mediaUrl}" type="video/mp4">
+        </video>
+        </li>`;
+                        }
+
+                        else {
+                            mediaHtml += '</li>';
+                        }
+                    });
+                    mediaHtml += '</ul>';
+                    $('#submission-media').html(mediaHtml);
+                } else {
+                    $('#submission-media').html('<p>没有相关媒体。</p>');
+                }
+            },
+            error: function (xhr, status, error) {
+                $('#submission-media').html('<p class="text-danger">无法获取实验媒体。</p>');
+            }
+        });
+    });
+
+    // 删除提交
+    const token = localStorage.getItem('jwt');
+    $('#delete-submission').click(function () {
+        //确认删除
+        if (!confirm('确认删除提交？')) {
+            return;
+        }
+        $.ajax({
+            url: `/api/submissions/${submissionId}`,
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + token
+            },
+            success: function () {
+                alert('提交删除成功');
+                window.location.href = '/experiment';
+            },
+            error: function (xhr, status, error) {
+                alert('删除提交失败');
+            }
+        });
+    });
+
+
+
+
+</script>
+</body>
+</html>

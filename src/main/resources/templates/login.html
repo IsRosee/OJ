@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理</title>
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link href="./css/all.min.css" rel="stylesheet">
+
+    <style>
+
+        body {
+        /*    背景图片*/
+            background-image: url("/img/bg.png");
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: auto;
+            display: flex;
+            justify-content: center;
+            padding-bottom: 50px;
+
+
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            max-width: 600px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            font-weight: bold;
+            font-family: "KaiTi";
+            color: #343a40;
+        }
+        .nav-tabs .nav-link.active {
+            background-color: #007bff;
+            color: white;
+        }
+        .nav-tabs .nav-link {
+            border: 1px solid #007bff;
+            border-radius: 0.25rem;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .form-control {
+            border-radius: 0.25rem;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+        .btn-link {
+            color: #007bff;
+        }
+        .btn-link:hover {
+            color: #0056b3;
+        }
+        .modal-content {
+            border-radius: 0.5rem;
+        }
+    /*    所有按钮居中*/
+        .btn {
+            display: block;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="text-center">用户管理</h2>
+    <ul class="nav nav-tabs justify-content-center" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="student-register-tab" data-toggle="tab" href="#student-register" role="tab" aria-controls="student-register" aria-selected="true">学生注册</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="teacher-register-tab" data-toggle="tab" href="#teacher-register" role="tab" aria-controls="teacher-register" aria-selected="false">教师注册</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="login-tab" data-toggle="tab" href="#login" role="tab" aria-controls="login" aria-selected="false">登录</a>
+        </li>
+<!--        邮箱验证找回密码-->
+        <li class="nav-item">
+            <a class="nav-link" id="email-tab" data-toggle="tab" href="#email" role="tab" aria-controls="email" aria-selected="false">找回密码</a>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="myTabContent">
+        <!-- Student Register Form -->
+        <div class="tab-pane fade show active" id="student-register" role="tabpanel" aria-labelledby="student-register-tab">
+            <form id="student-register-form" class="mt-3 needs-validation" novalidate>
+                <div class="form-group">
+                    <label for="student-username">用户名</label>
+                    <input type="text" class="form-control" id="student-username" required pattern="^\d{10}$">
+                    <div class="invalid-feedback">请输入有效的（10位数字学号）用户名。</div>
+                </div>
+                <div class="form-group">
+                    <label for="student-password">密码</label>
+                    <input type="password" class="form-control" id="student-password" required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$">
+                    <div class="invalid-feedback">密码必须至少为6个字符，并且包含字母和数字。</div>
+                </div>
+                <div class="form-group">
+                    <label for="student-email">邮箱</label>
+                    <input type="email" class="form-control" id="student-email" required>
+                    <div class="invalid-feedback">请输入有效的邮箱地址。</div>
+                </div>
+                <div class="form-group">
+                    <label for="student-number">学号</label>
+                    <input type="text" class="form-control" id="student-number" required pattern="^\d{10}$">
+                    <div class="invalid-feedback">学号必须为十位数字。</div>
+                </div>
+                <div class="form-group">
+                    <div class="alert alert-danger d-none" id="sr-error">登录失败，请检查用户名或密码。</div>
+                </div>
+                <button type="submit" class="btn btn-primary">注册</button>
+            </form>
+        </div>
+        <!-- Teacher Register Form -->
+        <div class="tab-pane fade" id="teacher-register" role="tabpanel" aria-labelledby="teacher-register-tab">
+            <form id="teacher-register-form" class="mt-3 needs-validation" novalidate>
+                <div class="form-group">
+                    <label for="teacher-username">用户名</label>
+                    <input type="text" class="form-control" id="teacher-username" required>
+                    <div class="invalid-feedback">请输入有效的用户名。</div>
+                </div>
+                <div class="form-group">
+                    <label for="teacher-password">密码</label>
+                    <input type="password" class="form-control" id="teacher-password" required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$">
+                    <div class="invalid-feedback">密码必须至少为6个字符，并且包含字母和数字。</div>
+                </div>
+                <div class="form-group">
+                    <label for="teacher-email">邮箱</label>
+                    <input type="email" class="form-control" id="teacher-email" required>
+                    <div class="invalid-feedback">请输入有效的邮箱地址。</div>
+                </div>
+                <div class="form-group">
+                    <div class="alert alert-danger d-none" id="tr-error">登录失败，请检查用户名或密码。</div>
+                </div>
+                <button type="submit" class="btn btn-primary">注册</button>
+            </form>
+        </div>
+        <!-- Login Form -->
+        <div class="tab-pane fade" id="login" role="tabpanel" aria-labelledby="login-tab">
+            <form id="login-form" class="mt-3 needs-validation" novalidate>
+                <div class="form-group">
+                    <label for="login-username">用户名</label>
+                    <input type="text" class="form-control" id="login-username" required>
+                    <div class="invalid-feedback">请输入有效的用户名。</div>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">密码</label>
+                    <input type="password" class="form-control" id="login-password" required>
+                    <div class="invalid-feedback">请输入密码。</div>
+                </div>
+                <div class="form-group form-check">
+                    <input type="checkbox" class="form-check-input" id="remember-me">
+                    <label class="form-check-label" for="remember-me">记住账号</label>
+                </div>
+                <div class="form-group">
+                    <div class="alert alert-danger d-none" id="login-error">登录失败，请检查用户名或密码。</div>
+                </div>
+                <button type="submit" class="btn btn-primary">登录</button>
+<!--                <a href="#email" id="forgot-password-link" class="btn btn-link">忘记密码？</a>-->
+            </form>
+        </div>
+        <!-- Email Form -->
+        <!-- Email Form -->
+        <div class="tab-pane fade" id="email" role="tabpanel" aria-labelledby="email-tab">
+            <form id="email-form" class="mt-3 needs-validation" novalidate>
+                <div class="form-group">
+                    <label for="email-address">邮箱</label>
+                    <input type="email" class="form-control" id="email-address" required>
+                    <div class="invalid-feedback">请输入有效的邮箱地址。</div>
+                </div>
+                <button type="button" class="btn btn-outline-info" id="send-code-button">发送验证码</button>
+                <div class="form-group mt-3">
+                    <label for="verification-code">验证码</label>
+                    <input type="text" class="form-control" id="verification-code" required pattern="^\d{6}$">
+                    <div class="invalid-feedback">请输入6位验证码（5分钟内有效）。</div>
+                </div>
+                <div class="form-group">
+                    <label for="new-password">新密码</label>
+                    <input type="password" class="form-control" id="new-password" required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$">
+                    <div class="invalid-feedback">密码必须至少为6个字符，并且包含字母和数字。</div>
+                </div>
+                <button type="submit" class="btn btn-primary">重置密码</button>
+            </form>
+        </div>
+        <br>
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='/index'">返回首页</button>
+    </div>
+</div>
+
+<!--&lt;!&ndash; Modal for Resetting Password &ndash;&gt;-->
+<!--<div class="modal fade" id="resetPasswordModal" tabindex="-1" role="dialog" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">-->
+<!--    <div class="modal-dialog" role="document">-->
+<!--        <div class="modal-content">-->
+<!--            <form id="reset-password-form" class="needs-validation" novalidate>-->
+<!--                <div class="modal-header">-->
+<!--                    <h5 class="modal-title" id="resetPasswordModalLabel">重置密码</h5>-->
+<!--                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
+<!--                        <span aria-hidden="true">&times;</span>-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--                <div class="modal-body">-->
+<!--                    <div class="form-group">-->
+<!--                        <label for="reset-password">新密码</label>-->
+<!--                        <input type="password" class="form-control" id="reset-password" required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$">-->
+<!--                        <div class="invalid-feedback">密码必须至少为6个字符，并且包含字母和数字。</div>-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label for="confirm-reset-password">确认新密码</label>-->
+<!--                        <input type="password" class="form-control" id="confirm-reset-password" required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$">-->
+<!--                        <div class="invalid-feedback">请确认你的密码。</div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                <div class="modal-footer">-->
+<!--                    <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>-->
+<!--                    <button type="submit" class="btn btn-primary">重置密码</button>-->
+<!--                </div>-->
+<!--            </form>-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>-->
+
+<script src="./js/jquery-3.7.1.min.js"></script>
+<script src="./js/popper.min.js"></script>
+<script src="./js/bootstrap.min.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/crypto-js@4.1.1/crypto-js.js"></script>-->
+<script>
+    $(document).ready(function () {
+        // Bootstrap validation
+        var forms = $('.needs-validation');
+        forms.each(function () {
+            $(this).on('submit', function (event) {
+                if (this.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                $(this).addClass('was-validated');
+            });
+        });
+
+        // 失去焦点时验证
+        $('input').on('blur', function () {
+            if (!this.checkValidity()) {
+                $(this).addClass('is-invalid');
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        // Send verification code via AJAX
+        $('#send-code-button').on('click', function () {
+            var emailInput = $('#email-address');
+            if (emailInput[0].checkValidity() === false) {
+                emailInput.addClass('is-invalid');
+            } else {
+                emailInput.removeClass('is-invalid');
+                $.ajax({
+                    type: 'POST',
+                    url: '/verify',
+                    data: { email: emailInput.val() },
+                    success: function (response) {
+                        alert('验证码已发送到您的邮箱');
+                    },
+                    error: function (error) {
+                        alert('发送验证码失败，请重试');
+                    }
+                });
+            }
+        });
+
+        // Reset password via AJAX
+        $('#email-form').on('submit', function (event) {
+            event.preventDefault();
+            if (this.checkValidity() === false) {
+                event.stopPropagation();
+            } else {
+                var emailInput = $('#email-address').val();
+                var verificationCode = $('#verification-code').val();
+                var newPassword = $('#new-password').val();
+                $.ajax({
+                    type: 'POST',
+                    url: '/verify/reset-password',
+                    data: {
+                        email: emailInput,
+                        code: verificationCode,
+                        newPassword: newPassword
+                    },
+                    success: function (response) {
+                        alert('密码重置成功');
+                    },
+                    error: function (error) {
+                        alert('密码重置失败，请重试');
+                    }
+                });
+            }
+            $(this).addClass('was-validated');
+        });
+    });
+</script>
+<script>
+    // const dbName = "UserManagementDB";
+    // const dbVersion = 1;
+    // let db;
+    // const MAX_LOGIN_ATTEMPTS = 3;
+    // const LOCKOUT_TIME = 5 * 60 * 1000; // 5 minutes
+    //
+    // // Open IndexedDB
+    // const request = indexedDB.open(dbName, dbVersion);
+    //
+    // request.onerror = function(event) {
+    //     console.error("Database error: ", event.target.error);
+    // };
+    //
+    // request.onsuccess = function(event) {
+    //     db = event.target.result;
+    //     console.log("Database opened successfully");
+    // };
+    //
+    // request.onupgradeneeded = function(event) {
+    //     db = event.target.result;
+    //     if (!db.objectStoreNames.contains("users")) {
+    //         const userStore = db.createObjectStore("users", { keyPath: "id", autoIncrement: true });
+    //         userStore.createIndex("username", "username", { unique: true });
+    //     }
+    // };
+
+    // // Hash function
+    // function hashPassword(password, salt) {
+    //     return CryptoJS.SHA256(password + salt).toString();
+    // }
+    // //
+    // // // Generate random salt
+    // function generateSalt() {
+    //     return CryptoJS.lib.WordArray.random(16).toString();
+    // }
+
+    // Validate form fields
+    function validateForm(form) {
+        let isValid = true;
+        form.find('input').each(function() {
+            if (!this.checkValidity()) {
+                $(this).addClass('is-invalid');
+                isValid = false;
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+        return isValid;
+    }
+
+    // Register student
+    // 失去焦点时验证
+    $('#student-register-form').on('blur', 'input', function() {
+        if (!this.checkValidity()) {
+            $(this).addClass('is-invalid');
+        } else {
+            $(this).removeClass('is-invalid');
+        }
+    });
+    $('#student-register-form').submit(function(e) {
+        e.preventDefault();
+        if (!validateForm($(this))) {
+            return;
+        }
+        const username = $('#student-username').val();
+        const password = $('#student-password').val();
+        const email = $('#student-email').val();  //jin
+        const studentNumber = $('#student-number').val();
+        // const salt = generateSalt();
+        // const hashedPassword = hashPassword(password, salt);
+
+        //   @Data
+        // public static class RegisterRequest {
+        //     private String username;
+        //     private String email;
+        //     private String password;
+        //     private String studentNumber; // Optional for teachers
+        //
+        //     // Getters and setters
+        // }
+        const newUser = {
+            username: username,
+            email: email,
+            password: password,
+            studentNumber: studentNumber
+        };
+
+    // @PostMapping("/register/student")
+    //     public ResponseEntity<?> registerStudent(@RequestBody RegisterRequest request) {
+    //         User user = userService.registerStudent(request.getUsername(), request.getEmail(), request.getPassword(), request.getStudentNumber());
+    //         return ResponseEntity.ok(user);
+    //     }
+        // 发起学生注册请求
+        fetch('/api/register/student', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newUser)
+        })
+            .then(response => response.text())
+            .then(data => {
+                // 判断status
+                if (data.startsWith("{\"id\":")) {
+                    alert('学生注册成功!');
+                    console.log(data);
+                }
+                else if(data === "学生注册已关闭") {
+                    // If the response is an error message, show it
+                    $('#sr-error').text(data).removeClass('d-none');
+                    alert("学生注册已关闭");
+                }
+                else {
+                    // If the response is an error message, show it
+                    $('#sr-error').text(data).removeClass('d-none');
+                    alert('学生注册失败!');
+                }
+                console.log(data);
+            })
+            .catch(error => {
+                // 显示后端返回的错误
+                alert(error);
+                console.error('Error:', error);
+            });
+
+    });
+
+    // Register teacher
+    // 失去焦点时验证
+    $('#teacher-register-form').on('blur', 'input', function() {
+        if (!this.checkValidity()) {
+            $(this).addClass('is-invalid');
+        } else {
+            $(this).removeClass('is-invalid');
+        }
+    });
+    $('#teacher-register-form').submit(function(e) {
+        e.preventDefault();
+        if (!validateForm($(this))) {
+            return;
+        }
+        const username = $('#teacher-username').val();
+        const password = $('#teacher-password').val();
+        const email = $('#teacher-email').val();  //jin
+        // const salt = generateSalt();
+        // const hashedPassword = hashPassword(password, salt);
+
+        const newUser = {
+            username: username,
+            email: email,
+            password: password
+        };
+
+
+        fetch('/api/register/teacher', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newUser)
+        })
+            .then(response => response.text())
+            .then(data => {
+                alert('教师注册成功!');
+                console.log(data);
+            })
+            .catch(error => {
+                alert('教师注册失败!')
+                console.error('Error:', error);
+            });
+    });
+
+    // Login
+    // 失去焦点时验证
+    $('#login-form').on('blur', 'input', function() {
+        if (!this.checkValidity()) {
+            $(this).addClass('is-invalid');
+        } else {
+            $(this).removeClass('is-invalid');
+        }
+    });
+    $('#login-form').submit(function(e) {
+        e.preventDefault();
+        if (!validateForm($(this))) {
+            return;
+        }
+        const username = $('#login-username').val();
+        const password = $('#login-password').val();
+        const rememberMe = $('#remember-me').is(':checked');
+
+
+    // @Data
+    //     public static class LoginRequest {
+    //         private String username;
+    //         private String password;
+    //
+    //     }
+        const loginRequest = {
+            username: username,
+            password: password
+        };
+        fetch('/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(loginRequest)
+        })
+            .then(response => response.text()) // Expecting plain text response
+            .then(data => {
+                if (data.startsWith('eyJ')) { // Assuming JWT starts with 'eyJ'
+                    // If the response is a JWT token, the login is successful
+                    alert('登录成功!');
+                    console.log(data);
+                    // Save the JWT token
+                    localStorage.setItem('jwt', data);
+                    // Redirect to the homepage
+                    window.location.href = '/';
+                }
+                else {
+                    // If the response is an error message, show it
+                    $('#login-error').text(data).removeClass('d-none');
+                }
+
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                $('#login-error').text('登录失败，请重试。').removeClass('d-none');
+            });
+        //
+        // request.onsuccess = function(event) {
+        //     const user = event.target.result;
+        //     if (user) {
+        //         const currentTime = new Date().getTime();
+        //         if (user.lockUntil && user.lockUntil > currentTime) {
+        //             showError('账户已锁定，请稍后再试。');
+        //             return;
+        //         }
+        //
+        //         const hashedPassword = hashPassword(password, user.salt);
+        //         if (user.password === hashedPassword) {
+        //             alert('登录成功!');
+        //             user.loginAttempts = 0;
+        //             user.lockUntil = null;
+        //
+        //             const updateTransaction = db.transaction(["users"], "readwrite");
+        //             const updateUserStore = updateTransaction.objectStore("users");
+        //             updateUserStore.put(user);
+        //
+        //             if (rememberMe) {
+        //                 localStorage.setItem('currentUser', JSON.stringify(user));
+        //             } else {
+        //                 localStorage.removeItem('currentUser');
+        //             }
+        //             window.location.href = '/';
+        //         } else {
+        //             user.loginAttempts += 1;
+        //             if (user.loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+        //                 user.lockUntil = currentTime + LOCKOUT_TIME;
+        //                 showError('账户已锁定，请稍后再试。');
+        //             } else {
+        //                 showError('密码错误!');
+        //             }
+        //
+        //             const updateTransaction = db.transaction(["users"], "readwrite");
+        //             const updateUserStore = updateTransaction.objectStore("users");
+        //             updateUserStore.put(user);
+        //         }
+        //     } else {
+        //         showError('用户不存在!');
+        //     }
+        // };
+
+        // request.onerror = function(event) {
+        //     showError('登录失败: ' + event.target.error.message);
+        // };
+    });
+
+    // Show error message
+    function showError(message) {
+        const errorDiv = $('#login-error');
+        errorDiv.text(message);
+        errorDiv.removeClass('d-none');
+        errorDiv.addClass('d-block');
+        $('#login-form').removeClass('was-validated');
+    }
+
+    // // Forgot Password
+    // $('#forgot-password-link').click(function(e) {
+    //     e.preventDefault();
+    //     const username = prompt("请输入您的用户名:");
+    //
+    //     // if (username) {
+    //     //     const transaction = db.transaction(["users"], "readonly");
+    //     //     const userStore = transaction.objectStore("users");
+    //     //     const index = userStore.index("username");
+    //     //     const request = index.get(username);
+    //     //
+    //     //     request.onsuccess = function(event) {
+    //     //         const user = event.target.result;
+    //     //         if (user) {
+    //     //             $('#resetPasswordModal').modal('show');
+    //     //             $('#reset-password-form').off('submit').on('submit', function(e) {
+    //     //                 e.preventDefault();
+    //     //                 if (!validateForm($(this))) {
+    //     //                     return;
+    //     //                 }
+    //     //                 const newPassword = $('#reset-password').val();
+    //     //                 const confirmPassword = $('#confirm-reset-password').val();
+    //     //
+    //     //                 if (newPassword !== confirmPassword) {
+    //     //                     alert('两次密码输入不一致!');
+    //     //                     return;
+    //     //                 }
+    //     //
+    //     //                 const salt = generateSalt();
+    //     //                 const hashedPassword = hashPassword(newPassword, salt);
+    //     //
+    //     //                 const transaction = db.transaction(["users"], "readwrite");
+    //     //                 const userStore = transaction.objectStore("users");
+    //     //                 user.password = hashedPassword;
+    //     //                 user.salt = salt;
+    //     //
+    //     //                 const updateRequest = userStore.put(user);
+    //     //
+    //     //                 updateRequest.onsuccess = function(event) {
+    //     //                     alert('密码重置成功!');
+    //     //                     $('#resetPasswordModal').modal('hide');
+    //     //                 };
+    //     //
+    //     //                 updateRequest.onerror = function(event) {
+    //     //                     alert('密码重置失败: ' + event.target.error.message);
+    //     //                 };
+    //     //             });
+    //     //         } else {
+    //     //             alert('用户名不存在!');
+    //     //         }
+    //     //     };
+    //     //
+    //     //     request.onerror = function(event) {
+    //     //         alert('操作失败: ' + event.target.error.message);
+    //     //     };
+    //     // }
+    // });
+
+    // Custom validation for forms
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            var forms = document.getElementsByClassName('needs-validation');
+            Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+    // Load remembered username if available
+    $(document).ready(function() {
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (currentUser && currentUser.username) {
+            $('#login-username').val(currentUser.username);
+            $('#remember-me').prop('checked', true);
+        }
+    });
+
+    // Clear username if "Remember Me" is unchecked
+    $('#remember-me').change(function() {
+        if (!this.checked) {
+            localStorage.removeItem('currentUser');
+            $('#login-username').val('');
+        }
+    });
+
+
+</script>
+</body>
+</html>

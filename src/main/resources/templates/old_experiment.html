@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验问题平台首页</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/all.min.css}" rel="stylesheet">
+    <style>
+        .navbar-nav a {
+            margin-right: 15px;
+        }
+        .experiment-item {
+            transition: background-color 0.3s;
+        }
+        .experiment-item:hover {
+            background-color: #f8f9fa;
+        }
+        .notification {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 页首 -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">实验平台</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto" id="navItems">
+            <li class="nav-item">
+                <a class="nav-link" href="/index">首页</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/experiment">实验问题</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/notification">课程通知</a>
+            </li>
+            <li class="nav-item" id = "testNavItem">
+                <a class="nav-link" href="/test">自测题库</a>
+            </li>
+            <li class="nav-item" id="loginNavItem">
+                <a class="nav-link" href="/login">注册登录</a>
+            </li>
+
+            <li class="nav-item" id="searchNavItem">
+                <form class="form-inline" th:action="@{/search}" method="get">
+                    <input class="form-control mr-sm-2" type="search" placeholder="搜索" aria-label="搜索" name="query">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜索</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- 内容 -->
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>实验问题列表</h2>
+            <div class="list-group" id="experiment-list">
+                <!--                <a href="#" class="list-group-item list-group-item-action experiment-item">实验问题1</a>-->
+                <!--                <a href="#" class="list-group-item list-group-item-action experiment-item">实验问题2</a>-->
+                <!--                <a href="#" class="list-group-item list-group-item-action experiment-item">实验问题3</a>-->
+                <!-- 新发布的实验问题将出现在这里 -->
+            </div>
+        </div>
+        <div class="col-md-4">
+            <h2>课程通知</h2>
+            <ul class="list-group" id="notification-list">
+                <!--                <li class="list-group-item">课程通知1</li>-->
+                <!--                <li class="list-group-item">课程通知2</li>-->
+                <!--                <li class="list-group-item">课程通知3</li>-->
+                <!-- 新发布的课程通知将出现在这里 -->
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- 实验发布模块 -->
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>发布实验问题</h2>
+            <form id="experiment-form">
+                <div class="form-group">
+                    <label for="experiment-title">标题</label>
+                    <input type="text" class="form-control" id="experiment-title" required>
+                </div>
+                <div class="form-group">
+                    <label for="experiment-description">描述</label>
+                    <textarea class="form-control" id="experiment-description" rows="5" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="experiment-media">上传媒体文件</label>
+                    <input type="file" class="form-control-file" id="experiment-media" multiple>
+                </div>
+                <div class="form-group">
+                    <label for="experiment-preview">预览</label>
+                    <div id="experiment-preview" class="border p-3">
+                        <!-- 预览内容将出现在这里 -->
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">发布</button>
+                <button type="button" class="btn btn-secondary" id="experiment-edit">编辑</button>
+                <button type="button" class="btn btn-danger" id="experiment-delete">删除</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 页脚 -->
+<footer class="bg-light text-center text-lg-start mt-5">
+    <div class="text-center p-3">
+        © 2024 实验平台. 保留所有权利.
+    </div>
+</footer>
+
+<!-- 动态提示框 -->
+<div class="notification" id="notification">
+    有新的课程通知或实验问题更新！
+</div>
+<script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+<script th:src="@{/js/popper.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/showUser.js}"></script>
+<script th:src="@{/js/showExperimentNotification.js}"></script>
+<script>
+    $(document).ready(function(){
+
+        // Experiment form submission handling
+        $('#experiment-form').on('submit', function(e) {
+            e.preventDefault();
+
+            // Get the JWT token from localStorage
+            let token = localStorage.getItem('jwt');
+            let title = $('#experiment-title').val();
+            let content = $('#experiment-description').val();
+            let files = $('#experiment-media')[0].files;
+
+            // Create the experiment first
+            let experimentRequest = {
+                title: title,
+                content: content,
+                status: 'DRAFT' // or any default status
+            };
+
+            $.ajax({
+                url: '/api/experiments',
+                type: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                contentType: 'application/json',
+                data: JSON.stringify(experimentRequest),
+                success: function(response) {
+                    alert('Experiment created successfully');
+                    flashTwoLists(); // 刷新
+                    // 返回的响应包含实验的ID
+                    console.log(response);
+                    const experimentId = response.id;
+
+                    // Upload each file and link to the experiment
+                    for (let i = 0; i < files.length; i++) {
+                        let file = files[i];
+                        let formData = new FormData();
+                        formData.append('file', file);
+
+                        $.ajax({
+                            url: '/api/experiments/upload',
+                            type: 'POST',
+                            data: formData,
+                            processData: false,
+                            contentType: false,
+                            success: function(fileUrl) {
+                                // Add media to the experiment
+                                let mediaRequest = {
+                                    url: fileUrl,
+                                    type: file.type
+                                };
+
+                                $.ajax({
+                                    url: '/api/experiments/' + experimentId + '/media',
+                                    type: 'POST',
+                                    contentType: 'application/json',
+                                    data: JSON.stringify(mediaRequest),
+                                    success: function(response) {
+                                        console.log('Media added to experiment');
+                                    },
+                                    error: function(error) {
+                                        console.error('Error adding media:', error);
+                                    }
+                                });
+                            },
+                            error: function(error) {
+                                console.error('Error uploading file:', error);
+                            }
+                        });
+                    }
+                },
+                error: function(error) {
+                    alert('Error creating experiment');
+                    console.error('Error:', error);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

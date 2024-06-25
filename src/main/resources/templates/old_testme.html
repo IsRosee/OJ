@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>答题系统</title>
+    <script src="http://172.31.73.236/assets/jquery-3.6.0.js"></script>
+    <link rel="stylesheet" href="http://172.31.73.236/resource/css/12-1.css">
+</head>
+<body>
+<h1>答题系统</h1>
+<div id="questions-container">
+
+
+    <!-- 获取数据后，使用JS循环动态渲染 -->
+
+
+
+</div>
+<button id="submit-button">提交答案</button>
+<script>
+    // 你的学号，用于测试有没成功调用接口的，作为参数之一
+    const userId = "2021150039";
+    const baseURL = "http://172.31.73.236:5525";
+    let questions = [];
+
+    // TODO: 发起请求，获取试卷题目并调用renderQuestions渲染
+    $.get(`${baseURL}/questions`, function (data) {
+        questions = data.results.questions;
+        console.log(questions);
+        renderQuestions(questions);
+    });
+
+    // 渲染题目
+    function renderQuestions(questions) {
+        const container = $("#questions-container");
+        container.empty(); // 清空容器中的旧内容
+        // TODO: 遍历questions数组，生成每个题目的HTML并追加到container中
+
+        for (let i = 0; i < questions.length; i++) {
+            const question = questions[i];
+            const questionId = question.questionId;
+            const questionContent = question.question;
+            const options = question.options;
+            const questionDiv = $(`<div class="question" data-question-id="${questionId}"></div>`);
+            const questionTitle = $(`<h3>题${questionId}: ${questionContent}</h3>`);
+            questionDiv.append(questionTitle);
+            // 乱序显示
+            options.sort(() => Math.random() - 0.5);
+            for (let j = 0; j < options.length; j++) {
+                const option = options[j];
+                // 纯文本的选项
+                const optionDiv = $(`<div></div>`);
+                const optionInput = $(`<input type="radio" name="question-${questionId}" value="${option}" id="question-${questionId}-option-${j}"/>`);
+                const optionLabel = $(`<label for="question-${questionId}-option-${j}"></label>`);
+                optionLabel.text(option); // 使用 text() 方法设置文本内容
+                optionDiv.append(optionInput);
+                optionDiv.append(optionLabel);
+                questionDiv.append(optionDiv);
+            }
+            container.append(questionDiv);
+        }
+
+        // 注意选项的表示方式
+
+    }
+    // 提交答案的具体要求
+    //     发起提交请求时需携带自己的学号作为user_id字段进行身份验证。
+    // 请求类型为“application/json”，具体请求参数以及返回结果需查看接口文档。
+    // 请求失败，则提示“提交失败”。
+    // 全部回答正确，则提示“提交成功，恭喜你答对了。”
+    // 回答错误x题，则提示“提交成功，但答错x题。”
+    // 提交答案
+    $("#submit-button").click(function () {
+        const answersPayload = [];// 对象数组，具体参考接口文档
+        // TODO: 遍历questions数组，收集用户的答案
+        for (let i = 0; i < questions.length; i++) {
+            const question = questions[i];
+            const questionId = question.questionId;
+            const selectedOption = $(`input[name="question-${questionId}"]:checked`).val();
+            if (selectedOption === undefined) {
+                break;
+            }
+            // answer为数组[]
+            let answer = [];
+            answer.push(selectedOption);
+            answersPayload.push({
+                questionId: questionId,
+                answer: answer,
+            });
+        }
+
+        if (answersPayload.length !== questions.length) {
+            alert("请回答所有问题");
+            return;
+        }
+        console.log(answersPayload);
+
+        const payload = {
+            user_id: userId,
+            answers: answersPayload,
+        };
+
+        // TODO: 发送答案到服务器，同时根据返回结果，计算并alert提示
+        $.ajax({
+            url: `${baseURL}/submit-answers`,
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(payload),
+            success: function (data) {
+                if (data.status === 200) {
+                    const results = data.results.results; // 获取响应中的结果数组
+                    console.log(results);
+                    let correctCount = 0;
+
+                    // 遍历结果数组，统计正确答案的数量
+                    for (let i = 0; i < results.length; i++) {
+                        if (results[i].correct) {
+                            correctCount++;
+                        }
+                    }
+
+                    if (correctCount === questions.length) {
+                        alert("提交成功，恭喜你答对了。");
+                    } else {
+                        alert(`提交成功，但答错${questions.length - correctCount}题。`);
+                    }
+                } else {
+                    alert("提交失败");
+                }
+            },
+            error: function () {
+                alert("提交失败");
+            },
+        });
+    });
+
+</script>
+</body>
+</html>

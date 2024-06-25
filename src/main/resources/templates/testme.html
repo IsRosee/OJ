@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>答题页面</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/all.min.css}" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="http://172.31.73.236/assets/jquery-3.6.0.js"></script>
+    <link rel="stylesheet" href="http://172.31.73.236/resource/css/12-1.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 50px;
+            color: #333;
+        }
+
+        #questions-container {
+            width: 80%;
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .question {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: #fafafa;
+        }
+
+        .question h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: #009688;
+        }
+
+        /* option css */
+        .question input[type="radio"] {
+            display: none;
+        }
+
+        .question label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .question label:hover {
+            background-color: #f0f0f0;
+        }
+
+        .question label:before {
+            content: '';
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border: 2px solid #009688;
+            border-radius: 50%;
+            margin-right: 10px;
+            box-sizing: border-box;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .question input[type="radio"]:checked+label:before {
+            background-color: #009688;
+            border-color: #009688;
+        }
+
+        /* submit button  */
+        #submit-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: #009688;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #submit-button:hover  {
+            background-color: #00796b;
+        }
+
+        #back-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 20px;
+            background-color: gray;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #back-button:hover  {
+            background-color: #333;
+        }
+    </style>
+
+    <script>
+        let db;
+        const DB_NAME = "webDatabase_2021110246";
+        const DB_VERSION = 1;
+        const QUESTION_STORE_NAME = "questions";
+
+        window.onload = function () {
+            const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+            request.onsuccess = function (event) {
+                db = event.target.result;
+                loadQuestions();
+            };
+
+            request.onerror = function (event) {
+                console.error("Database error: ", event.target.error);
+            };
+        };
+
+        function loadQuestions() {
+            const currentPaperId = localStorage.getItem('currentPaperId');
+            console.log(currentPaperId)
+            const papers = JSON.parse(localStorage.getItem('papers'));
+            const currentPaper = papers.find(paper => paper.id == currentPaperId);
+            console.log(currentPaper)
+
+            if (currentPaper) {
+                const transaction = db.transaction([QUESTION_STORE_NAME], "readonly");
+                const store = transaction.objectStore(QUESTION_STORE_NAME);
+
+                const randomizeAnswers = currentPaper.randomizeAnswers;
+                const allowReview = currentPaper.allowReview;
+                const allowBacktrack = currentPaper.allowBacktrack;
+
+                const questionPromises = currentPaper.questions.map(questionId => {
+                    return new Promise((resolve, reject) => {
+                        const request = store.get(parseInt(questionId));
+                        request.onsuccess = function (event) {
+                            resolve(event.target.result);
+                        };
+                        request.onerror = function (event) {
+                            reject(event.target.error);
+                        };
+                    });
+                });
+
+                Promise.all(questionPromises).then(questions => {
+                    renderQuestions(questions, randomizeAnswers, allowReview, allowBacktrack);
+                });
+            } else {
+                console.error("No paper found with the given ID.");
+            }
+        }
+
+        // 渲染题目
+        function renderQuestions(questions, randomizeAnswers, allowReview, allowBacktrack) {
+            const container = $("#questions-container");
+            container.empty(); // 清空容器中的旧内容
+
+            // 创建全局答案存储对象
+            const userAnswers = {};
+
+            questions.forEach((question, index) => {
+                const questionId = question.id;
+                const questionContent = question.content;
+                const questionType = question.type;
+                const options = question.options || [];
+                const answer = question.answer; // 获取答案
+                const questionDiv = $(`<div class="question" data-question-id="${questionId}"></div>`);
+                const questionTitle = $(`
+                    <h3>题${index + 1}: ${questionContent}
+                    <span>(${questionType})</span>
+                    ${allowReview ? '<button class="btn btn-info btn-sm show-answer">查看答案</button>' : ''}
+                    </h3>
+                `);
+                questionDiv.append(questionTitle);
+
+                // 根据题目类型渲染不同的选项
+                switch (questionType) {
+                    case '单选':
+                        if (randomizeAnswers) {
+                            options.sort(() => Math.random() - 0.5);
+                        } // 乱序显示
+                        options.slice(0, 4).forEach((option, optionIndex) => {
+                            const optionDiv = $(`<div></div>`);
+                            const optionInput = $(`<input type="radio" name="question-${questionId}" value="${option}" id="question-${questionId}-option-${optionIndex}"/>`);
+                            const optionLabel = $(`<label for="question-${questionId}-option-${optionIndex}"></label>`);
+                            optionLabel.text(option);
+                            optionDiv.append(optionInput);
+                            optionDiv.append(optionLabel);
+                            questionDiv.append(optionDiv);
+                        });
+                        break;
+                    case '多选':
+                        if (randomizeAnswers) {
+                            options.sort(() => Math.random() - 0.5);
+                        } // 乱序显示
+                        options.slice(0, 4).forEach((option, optionIndex) => {
+                            const optionDiv = $(`<div></div>`);
+                            const optionInput = $(`<input type="checkbox" name="question-${questionId}" value="${option}" id="question-${questionId}-option-${optionIndex}"/>`);
+                            const optionLabel = $(`<label for="question-${questionId}-option-${optionIndex}"></label>`);
+                            optionLabel.text(option);
+                            optionDiv.append(optionInput);
+                            optionDiv.append(optionLabel);
+                            questionDiv.append(optionDiv);
+                        });
+                        break;
+                    case '判断':
+                        ['正确', '错误'].forEach((option, optionIndex) => {
+                            const optionDiv = $(`<div></div>`);
+                            const optionInput = $(`<input type="radio" name="question-${questionId}" value="${option}" id="question-${questionId}-option-${optionIndex}"/>`);
+                            const optionLabel = $(`<label for="question-${questionId}-option-${optionIndex}"></label>`);
+                            optionLabel.text(option);
+                            optionDiv.append(optionInput);
+                            optionDiv.append(optionLabel);
+                            questionDiv.append(optionDiv);
+                        });
+                        break;
+                    case '填空':
+                        const fillInBlankInput = $(`<input type="text" name="question-${questionId}" id="question-${questionId}-fill" class="form-control"/>`);
+                        questionDiv.append(fillInBlankInput);
+                        break;
+                    default:
+                        console.error('未知的题目类型: ', questionType);
+                        break;
+                }
+
+                // 绑定显示答案按钮的点击事件
+                const answerDiv = $(`<div class="answer" style="display: none;"><strong>答案:</strong> ${answer}</div>`);
+                questionDiv.append(answerDiv);
+
+                container.append(questionDiv);
+            });
+
+            if (allowReview) {
+                // 绑定显示答案按钮的点击事件
+                container.on("click", ".show-answer", function () {
+                    const answerDiv = $(this).closest(".question").find(".answer");
+                    answerDiv.toggle();
+                });
+            }
+
+            if (allowBacktrack) {
+                // 允许回退修改答案，绑定输入框和选择框的change事件
+                container.on("change", "input", function () {
+                    const questionDiv = $(this).closest(".question");
+                    const questionId = questionDiv.data("question-id");
+                    const inputType = $(this).attr("type");
+
+                    if (inputType === "radio" || inputType === "checkbox") {
+                        userAnswers[questionId] = [];
+                        questionDiv.find("input:checked").each(function () {
+                            userAnswers[questionId].push($(this).val());
+                        });
+                    } else if (inputType === "text") {
+                        userAnswers[questionId] = $(this).val();
+                    }
+                });
+            } else {
+                // 禁止回退修改答案
+                container.on("change", "input", function () {
+                    const questionDiv = $(this).closest(".question");
+                    const questionId = questionDiv.data("question-id");
+                    const inputType = $(this).attr("type");
+
+                    if (!userAnswers[questionId]) {
+                        userAnswers[questionId] = [];
+                    }
+
+                    if (inputType === "radio") {
+                        questionDiv.find("input").attr("disabled", true);
+                        questionDiv.find("input:checked").each(function () {
+                            userAnswers[questionId].push($(this).val());
+                        });
+                    } else if (inputType === "text") {
+                        questionDiv.find("input").attr("disabled", true);
+                        userAnswers[questionId] = $(this).val();
+                    }
+                });
+            }
+
+            // 提交按钮事件处理
+            $("#submit-button").on("click", function () {
+                let correctCount = 0;
+
+                // 计算正确答案数量
+                questions.forEach(question => {
+                    const userAnswer = userAnswers[question.id];
+                    const correctAnswer = question.answer;
+
+                    if (question.type === '单选' || question.type === '判断') {
+                        if (userAnswer && userAnswer.length === 1 && userAnswer[0] === correctAnswer) {
+                            correctCount++;
+                        }
+                    } else if (question.type === '多选') {
+                        const sortedUserAnswer = (userAnswer || []).sort().join('');
+                        const sortedCorrectAnswer = correctAnswer.split('').sort().join('');
+                        if (sortedUserAnswer === sortedCorrectAnswer) {
+                            correctCount++;
+                        }
+                    } else if (question.type === '填空') {
+                        if (userAnswer && userAnswer.trim() === correctAnswer.trim()) {
+                            correctCount++;
+                        }
+                    }
+                });
+
+                const token = localStorage.getItem('jwt');
+
+                // 获取当前用户信息
+                $.ajax({
+                    url: '/api/currentUser',
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token // 在请求头中附带 JWT
+                    },
+                    success: function (response) {
+                        // 获取到用户信息后执行存储操作
+                        const currentUser = {
+                            name: response.username,
+                            studentNumber: response.studentNumber,
+                            correctAnswers: correctCount
+                        };
+
+                        // 获取当前试卷ID
+                        const currentPaperId = localStorage.getItem('currentPaperId');
+
+                        // 先获取存储在localStorage中的试卷信息数组
+                        let paperData = JSON.parse(localStorage.getItem(`paper_${currentPaperId}_students`)) || [];
+
+                        // 将当前用户信息添加到数组中
+                        paperData.push(currentUser);
+
+                        // 存储更新后的数组回到localStorage中
+                        localStorage.setItem(`paper_${currentPaperId}_students`, JSON.stringify(paperData));
+                        console.log(JSON.parse(localStorage.getItem(`paper_${currentPaperId}_students`)) )
+                        // 提示用户答题结果
+                        alert("你答对了 " + correctCount + " 道题。");
+
+
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("获取当前用户信息失败:", error);
+                        // 处理错误情况
+                    }
+                });
+            });
+        }
+
+
+    </script>
+</head>
+
+<body>
+<h1>答题系统</h1>
+<div id="questions-container"></div>
+<button id="submit-button">提交答案</button>
+<button id="back-button" onclick="window.history.back()">返回</button>
+<script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+<script th:src="@{/js/popper.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/showUser.js}"></script>
+</body>
+
+</html>

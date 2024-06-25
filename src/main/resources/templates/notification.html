@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验问题平台首页</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/all.min.css}" rel="stylesheet">
+    <link th:href="@{/css/nav.css}" rel="stylesheet">
+    <style>
+        .navbar-nav a {
+            margin-right: 15px;
+        }
+
+        .experiment-item {
+            transition: background-color 0.3s;
+        }
+
+        .experiment-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .notification {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 页首 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <!--    logo-->
+        <img src="/img/logo.jpg" alt="logo" style="width: 50px; height: 50px;">
+        <a class="navbar-brand" href="#">实验平台</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto" id="navItems">
+                <li class="nav-item">
+                    <a class="nav-link" href="/index">首页</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/experiment">实验问题</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/notification">课程通知</a>
+                </li>
+                <li class="nav-item" id="testNavItem">
+                    <a class="nav-link" href="/test">自测题库</a>
+                </li>
+                <li class="nav-item" id="loginNavItem">
+                    <a class="nav-link" href="/login">注册登录</a>
+                </li>
+<!--                <li class="nav-item" id="searchNavItem">-->
+<!--                    <form class="form-inline" th:action="@{/search}" method="get">-->
+<!--                        <input class="form-control mr-sm-2" type="search" placeholder="搜索" aria-label="搜索" name="query">-->
+<!--                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜索</button>-->
+<!--                    </form>-->
+<!--                </li>-->
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 内容 -->
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-4" id="hxy_info_1">
+                <h2>课程通知</h2>
+                <input type="text" id="notification-search" class="form-control mb-2" placeholder="搜索课程通知...">
+                <ul class="list-group" id="notification-list" style="width: 800px;">
+<!--                    <li class="list-group-item" data-id="1">课程通知1</li>-->
+<!--                    <li class="list-group-item" data-id="2">课程通知2</li>-->
+<!--                    <li class="list-group-item" data-id="3">课程通知3</li>-->
+                    <!-- 新发布的课程通知将出现在这里 -->
+                </ul>
+            </div>
+        </div>
+        <div class="row mt-5" id="hxy_info_2">
+            <div class="col-md-12">
+                <h2>发布课程通知</h2>
+                <form id="notification-form">
+                    <div class="form-group">
+                        <label for="notification-title">通知标题</label>
+                        <input type="text" class="form-control" id="notification-title" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="notification-content">通知内容</label>
+                        <textarea class="form-control" id="notification-content" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">发布通知</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">通知详情</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- 通知内容将被插入这里 -->
+                    <p id="notificationContent"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-light text-center text-lg-start mt-5">
+        <div class="text-center p-3">
+            © 2024 实验平台. 保留所有权利.
+        </div>
+    </footer>
+
+    <!-- 动态提示框 -->
+    <div class="notification" id="notification">
+        有新的课程通知或实验问题更新！
+    </div>
+
+    <!-- JavaScript 加载顺序 -->
+    <script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+    <script th:src="@{/js/popper.min.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+    <script th:src="@{/js/showUser.js}"></script>
+    <script th:src="@{/js/showExperimentNotification.js}"></script>
+    <script>
+        var roleDisplay;
+
+        $(document).ready(function () {
+            const token = localStorage.getItem('jwt');
+            $.ajax({
+                url: '/api/currentUser',
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token // 在请求头中附带 JWT
+                },
+                success: function (response) {
+                    // console.log(response);
+                    const role = response.userType;
+                    if (role === "TEACHER") {
+                        roleDisplay = "教师";
+                    } else if (role === "STUDENT") {
+                        roleDisplay = "学生";
+                        // JavaScript
+                        var container = document.getElementById('hxy_info_1');
+                        var buttons = container.getElementsByTagName('button');
+
+                        for (var i = 0; i < buttons.length; i++) {
+                            buttons[i].classList.add('hidden');
+                        }
+                        var hxy_info = document.getElementById('hxy_info_2');
+                        hxy_info.style.display = 'none';
+                    } else {
+                        roleDisplay = "游客";
+                    }
+                    console.log("roleDisplay", roleDisplay);
+
+                }
+            })
+            $(document).on('click', '.list-group-item', function () {
+                console.log("this", $(this).data());
+                const id = $(this).data('id');
+                // 显示课程通知详情的逻辑
+                fetch('/api/notifications')
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(notification => {
+                            if (notification.id == id) {
+                                console.log(notification.content);
+                                // 将通知内容插入模态框
+                                $('#notificationContent').text(notification.content);
+                                // 显示模态框
+                                $('#notificationModal').modal('show');
+                            }
+                        });
+                    });
+            });
+
+            // 处理表单提交
+            $('#notification-form').on('submit', function (e) {
+                e.preventDefault();
+
+                const title = $('#notification-title').val();
+                const content = $('#notification-content').val();
+
+                const notificationData = {title, content};
+                const token = localStorage.getItem('jwt');
+                console.log(token);
+                fetch('/api/notifications', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(notificationData)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                throw new Error(text)
+                            });
+                        }
+                        console.log(response);
+                        return response;
+                    })
+                    .then(data => {
+                        flashTwoLists();
+                        $('#notification').fadeIn().delay(1000).fadeOut();
+                        $('#notification-form')[0].reset();
+
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Failed to create notification: ' + error.message);
+                    });
+            });
+        });
+    </script>
+</body>
+
+</html>

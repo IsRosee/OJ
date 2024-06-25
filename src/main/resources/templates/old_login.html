@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理</title>
+    <!-- CSS -->
+    <!-- 导入编译并压缩过的 CSS 文件 -->
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/all.min.css}" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <h2 class="text-center">用户管理</h2>
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="student-register-tab" data-toggle="tab" href="#student-register" role="tab" aria-controls="student-register" aria-selected="true">学生注册</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="teacher-register-tab" data-toggle="tab" href="#teacher-register" role="tab" aria-controls="teacher-register" aria-selected="false">教师注册</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="login-tab" data-toggle="tab" href="#login" role="tab" aria-controls="login" aria-selected="false">登录</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="password-reset-tab" data-toggle="tab" href="#password-reset" role="tab" aria-controls="password-reset" aria-selected="false">密码重置</a>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="myTabContent">
+        <!-- Student Register Form -->
+        <div class="tab-pane fade show active" id="student-register" role="tabpanel" aria-labelledby="student-register-tab">
+            <form id="student-register-form" class="mt-3">
+                <div class="form-group">
+                    <label for="student-username">用户名</label>
+                    <input type="text" class="form-control" id="student-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="student-email">邮箱</label>
+                    <input type="email" class="form-control" id="student-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="student-password">密码</label>
+                    <input type="password" class="form-control" id="student-password" required>
+                </div>
+                <div class="form-group">
+                    <label for="student-number">学号</label>
+                    <input type="text" class="form-control" id="student-number" required>
+                </div>
+                <button type="submit" class="btn btn-primary">注册</button>
+            </form>
+        </div>
+        <!-- Teacher Register Form -->
+        <div class="tab-pane fade" id="teacher-register" role="tabpanel" aria-labelledby="teacher-register-tab">
+            <form id="teacher-register-form" class="mt-3">
+                <div class="form-group">
+                    <label for="teacher-username">用户名</label>
+                    <input type="text" class="form-control" id="teacher-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="teacher-email">邮箱</label>
+                    <input type="email" class="form-control" id="teacher-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="teacher-password">密码</label>
+                    <input type="password" class="form-control" id="teacher-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">注册</button>
+            </form>
+        </div>
+        <!-- Login Form -->
+        <div class="tab-pane fade" id="login" role="tabpanel" aria-labelledby="login-tab">
+            <form id="login-form" class="mt-3">
+                <div class="form-group">
+                    <label for="login-username">用户名</label>
+                    <input type="text" class="form-control" id="login-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">密码</label>
+                    <input type="password" class="form-control" id="login-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary">登录</button>
+            </form>
+        </div>
+        <!-- Password Reset Form -->
+        <div class="tab-pane fade" id="password-reset" role="tabpanel" aria-labelledby="password-reset-tab">
+            <form id="password-reset-form" class="mt-3">
+                <div class="form-group">
+                    <label for="reset-email">邮箱</label>
+                    <input type="email" class="form-control" id="reset-email" required>
+                </div>
+                <button type="submit" class="btn btn-primary">重置密码</button>
+            </form>
+        </div>
+        <br>
+        <button type="button" class="btn btn-primary" onclick="window.location.href='/index'">返回首页</button>
+    </div>
+</div>
+
+<!-- 导入编译并压缩过的 JavaScript 文件 -->
+<script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+<script th:src="@{/js/popper.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script>
+    $(document).ready(function () {
+        $('#student-register-form').submit(function (e) {
+            e.preventDefault();
+            const data = {
+                username: $('#student-username').val(),
+                email: $('#student-email').val(),
+                password: $('#student-password').val(),
+                studentNumber: $('#student-number').val()
+            };
+            fetch('/api/register/student', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert('学生注册成功!');
+                    console.log(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+
+        $('#teacher-register-form').submit(function (e) {
+            e.preventDefault();
+            const data = {
+                username: $('#teacher-username').val(),
+                email: $('#teacher-email').val(),
+                password: $('#teacher-password').val()
+            };
+            fetch('/api/register/teacher', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert('教师注册成功!');
+                    console.log(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+
+        $('#login-form').submit(function (e) {
+            e.preventDefault();
+            const data = {
+                username: $('#login-username').val(),
+                password: $('#login-password').val()
+            };
+            console.log(data);
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.text())
+                .then(data => {
+                    alert('登录成功!');
+                    console.log(data);
+                    // localStorage.setItem('currentUser', JSON.stringify(data));
+                    localStorage.setItem('jwt', data); // 保存 JWT
+                    window.location.href = '/';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+
+        $('#password-reset-form').submit(function (e) {
+            e.preventDefault();
+            const data = {
+                email: $('#reset-email').val()
+            };
+            fetch('/api/password-reset', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    alert('密码重置邮件已发送!');
+                    console.log(data);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    });
+</script>
+</body>
+</html>

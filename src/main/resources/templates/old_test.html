@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>实验平台自测题库</title>
+  <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+  <link th:href="@{/css/all.min.css}" rel="stylesheet">
+  <style>
+    .navbar-nav a {
+      margin-right: 15px;
+    }
+
+    .form-check-inline .form-check-input {
+      margin-left: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- 页首 -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand" href="#">实验平台</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
+          aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav ml-auto" id="navItems">
+      <li class="nav-item">
+        <a class="nav-link" href="/index">首页</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/experiment">实验问题</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/notification">课程通知</a>
+      </li>
+      <li class="nav-item" id="testNavItem">
+        <a class="nav-link" href="/test">自测题库</a>
+      </li>
+      <li class="nav-item" id="loginNavItem">
+        <a class="nav-link" href="/login">注册登录</a>
+      </li>
+
+      <li class="nav-item" id="searchNavItem">
+        <form class="form-inline" th:action="@{/search}" method="get">
+          <input class="form-control mr-sm-2" type="search" placeholder="搜索" aria-label="搜索" name="query">
+          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜索</button>
+        </form>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- 内容 -->
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-8">
+      <h2>创建自测题目</h2>
+      <form id="quiz-form">
+        <div class="form-group">
+          <label for="question-type">题目类型</label>
+          <select class="form-control" id="question-type" name="question-type">
+            <option value="single">单选题</option>
+            <option value="multiple">多选题</option>
+            <option value="boolean">判断题</option>
+            <option value="fill">填空题</option>
+            <option value="short">简答题</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="question-text">题目</label>
+          <textarea class="form-control" id="question-text" rows="3"  name="question-text"></textarea>
+        </div>
+        <div class="form-group" id="options-container">
+          <!-- 动态生成选项输入框 -->
+        </div>
+        <div class="form-group" id="answer-container">
+          <label for="answer">答案</label>
+          <input type="text" class="form-control" id="answer"  name="answer">
+        </div>
+        <button type="submit" class="btn btn-primary">创建题目</button>
+      </form>
+    </div>
+    <div class="col-md-4">
+      <h2>自测题目列表</h2>
+      <ul class="list-group" id="quiz-list">
+        <!-- 自测题目列表 -->
+      </ul>
+    </div>
+  </div>
+  <div class="row mt-5">
+    <div class="col-md-12">
+      <h2>生成自测试卷</h2>
+      <form id="paper-form">
+        <div class="form-group">
+          <label for="paper-title">试卷标题</label>
+          <input type="text" class="form-control" id="paper-title"  name="paper-title">
+        </div>
+        <div class="form-group">
+          <label for="paper-questions">选择题目</label>
+          <select multiple class="form-control" id="paper-questions" name="paper-questions">
+            <!-- 动态生成题目选项 -->
+          </select>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" id="randomize-answers" value="randomize" name="randomize-answers">
+          <label class="form-check-label" for="randomize-answers">随机排列答案</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" id="allow-review" value="review" name="allow-review">
+          <label class="form-check-label" for="allow-review">允许查看答案</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input class="form-check-input" type="checkbox" id="allow-backtrack" value="backtrack" name="allow-backtrack">
+          <label class="form-check-label" for="allow-backtrack">允许回退答题</label>
+        </div>
+        <button type="submit" class="btn btn-primary">生成试卷</button>
+      </form>
+    </div>
+  </div>
+  <div class="row mt-5">
+    <div class="col-md-12">
+      <h2>自测试卷列表</h2>
+      <ul class="list-group" id="paper-list">
+        <!-- 自测试卷列表 -->
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- 页脚 -->
+<footer class="bg-light text-center text-lg-start mt-5">
+  <div class="text-center p-3">
+    © 2024 实验平台. 保留所有权利.
+  </div>
+</footer>
+
+<script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+<script th:src="@{/js/popper.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/showUser.js}"></script>
+
+<!--<script>-->
+<!--  const token = localStorage.getItem('jwt');-->
+<!--  $(document).ready(function () {-->
+<!--    const quizList = [];-->
+<!--    const paperList = [];-->
+
+<!--    $('#question-type').change(function () {-->
+<!--      const type = $(this).val();-->
+<!--      const optionsContainer = $('#options-container');-->
+<!--      const answerContainer = $('#answer-container');-->
+<!--      optionsContainer.empty();-->
+<!--      answerContainer.show();-->
+
+<!--      if (type === 'single' || type === 'multiple') {-->
+<!--        for (let i = 1; i <= 4; i++) {-->
+<!--          optionsContainer.append(-->
+<!--                  `<div class="form-group">-->
+<!--              <label for="option${i}">选项${i}</label>-->
+<!--              <input type="text" class="form-control" id="option${i}"  name="option${i}">-->
+<!--            </div>`-->
+<!--          );-->
+<!--        }-->
+<!--      } else if (type === 'boolean') {-->
+<!--        answerContainer.hide();-->
+<!--        optionsContainer.append(-->
+<!--                `<div class="form-group">-->
+<!--            <div class="form-check">-->
+<!--              <input class="form-check-input" type="radio" name="boolean-answer" id="true" value="true" >-->
+<!--              <label class="form-check-label" for="true">正确</label>-->
+<!--            </div>-->
+<!--            <div class="form-check">-->
+<!--              <input class="form-check-input" type="radio" name="boolean-answer" id="false" value="false" >-->
+<!--              <label class="form-check-label" for="false">错误</label>-->
+<!--            </div>-->
+<!--          </div>`-->
+<!--        );-->
+<!--      } else if (type === 'fill' || type === 'short') {-->
+<!--        answerContainer.append(-->
+<!--                `<div class="form-group">-->
+<!--            <label for="answer">答案</label>-->
+<!--            <input type="text" class="form-control" id="answer"  name="answer">-->
+<!--          </div>`-->
+<!--        );-->
+<!--      }-->
+<!--    });-->
+
+<!--    $('#quiz-form').on('submit', function (e) {-->
+<!--      e.preventDefault();-->
+<!--      const type = $('#question-type').val();-->
+<!--      const text = $('#question-text').val();-->
+<!--      let options = [];-->
+
+<!--      if (type === 'single' || type === 'multiple') {-->
+<!--        for (let i = 1; i <= 4; i++) {-->
+<!--          options.push($(`#option${i}`).val());-->
+<!--        }-->
+<!--      } else if (type === 'boolean') {-->
+<!--        options.push($('input[name="boolean-answer"]:checked').val());-->
+<!--      } else if (type === 'fill' || type === 'short') {-->
+<!--        options.push($('#answer').val());-->
+<!--      }-->
+
+<!--      const questionData = { type, text, options };-->
+<!--      fetch('/api/questions', {-->
+<!--        method: 'POST',-->
+<!--        headers: {-->
+<!--          'Content-Type': 'application/json',-->
+<!--          'Authorization': 'Bearer ' + token-->
+<!--        },-->
+<!--        body: JSON.stringify(questionData)-->
+<!--      })-->
+<!--              .then(response => response.json())-->
+<!--              .then(data => {-->
+<!--                quizList.push(data);-->
+<!--                updateQuizList();-->
+<!--                updatePaperQuestions();-->
+<!--                this.reset();-->
+<!--              })-->
+<!--              .catch(error => console.error('Error:', error));-->
+<!--    });-->
+
+<!--    function updateQuizList() {-->
+<!--      const quizListEl = $('#quiz-list');-->
+<!--      quizListEl.empty();-->
+<!--      quizList.forEach((quiz, index) => {-->
+<!--        quizListEl.append(-->
+<!--                `<li class="list-group-item">${quiz.text} (${quiz.type})</li>`-->
+<!--        );-->
+<!--      });-->
+<!--    }-->
+
+<!--    function updatePaperQuestions() {-->
+<!--      const paperQuestionsEl = $('#paper-questions');-->
+<!--      paperQuestionsEl.empty();-->
+<!--      quizList.forEach((quiz, index) => {-->
+<!--        paperQuestionsEl.append(-->
+<!--                `<option value="${index}">${quiz.text}</option>`-->
+<!--        );-->
+<!--      });-->
+<!--    }-->
+
+<!--    $('#paper-form').on('submit', function (e) {-->
+<!--      e.preventDefault();-->
+<!--      const title = $('#paper-title').val();-->
+<!--      const questions = $('#paper-questions').val();-->
+<!--      const randomizeAnswers = $('#randomize-answers').is(':checked');-->
+<!--      const allowReview = $('#allow-review').is(':checked');-->
+<!--      const allowBacktrack = $('#allow-backtrack').is(':checked');-->
+
+<!--      const paperData = { title, questions, randomizeAnswers, allowReview, allowBacktrack };-->
+<!--      fetch('/api/testPapers', {-->
+<!--        method: 'POST',-->
+<!--        headers: {-->
+<!--          'Content-Type': 'application/json'-->
+<!--        },-->
+<!--        body: JSON.stringify(paperData)-->
+<!--      })-->
+<!--              .then(response => response.json())-->
+<!--              .then(data => {-->
+<!--                paperList.push(data);-->
+<!--                updatePaperList();-->
+<!--                this.reset();-->
+<!--              })-->
+<!--              .catch(error => console.error('Error:', error));-->
+<!--    });-->
+
+<!--    function updatePaperList() {-->
+<!--      const paperListEl = $('#paper-list');-->
+<!--      paperListEl.empty();-->
+<!--      paperList.forEach((paper, index) => {-->
+<!--        paperListEl.append(-->
+<!--                `<li class="list-group-item">${paper.title}-->
+<!--      <button class="btn btn-primary btn-sm float-right" data-id="${paper.id}">测试</button>-->
+<!--    </li>`-->
+<!--        );-->
+
+<!--        // 点击按钮后进入/testme-->
+<!--        paperListEl.find('button').last().click(function () {-->
+<!--          // window.location.href = `/testme?id=${$(this).data('id')}`;-->
+<!--            window.location.href = `/testme`;-->
+<!--        });-->
+<!--      });-->
+<!--    }-->
+<!--  });-->
+<!--</script>-->
+<!--local存储版-->
+<script>
+  $(document).ready(function () {
+    const quizList = JSON.parse(localStorage.getItem('quizzes')) || [];
+    const paperList = JSON.parse(localStorage.getItem('papers')) || [];
+
+    function updateQuizList() {
+      const quizListElement = $('#quiz-list');
+      quizListElement.empty();
+      // 点击答题按钮后进入/testme
+      quizList.forEach((quiz, index) => {
+        quizListElement.append(`<li class="list-group-item">${quiz.text}
+<button class="btn btn-primary btn-sm float-right" id=answer data-id="${quiz.id}">答题</button>
+<button class="btn btn-danger btn-sm float-right" onclick="deleteQuiz(${index})">删除</button></li>`);
+
+        quizListElement.find('button').last().click(function () {
+          window.location.href = `/testme`;
+        });
+      });
+    }
+
+    function updatePaperList() {
+      const paperListElement = $('#paper-list');
+      paperListElement.empty();
+      paperList.forEach((paper, index) => {
+        paperListElement.append(`<li class="list-group-item">${paper.title} <button class="btn btn-danger btn-sm float-right" onclick="deletePaper(${index})">删除</button></li>`);
+      });
+    }
+
+    function updatePaperQuestions() {
+      const paperQuestionsElement = $('#paper-questions');
+      paperQuestionsElement.empty();
+      quizList.forEach((quiz, index) => {
+        paperQuestionsElement.append(`<option value="${index}">${quiz.text}</option>`);
+      });
+    }
+
+    function addQuiz(quiz) {
+      quizList.push(quiz);
+      localStorage.setItem('quizzes', JSON.stringify(quizList));
+      updateQuizList();
+      updatePaperQuestions();
+    }
+
+    function addPaper(paper) {
+      paperList.push(paper);
+      localStorage.setItem('papers', JSON.stringify(paperList));
+      updatePaperList();
+    }
+
+    function deleteQuiz(index) {
+      quizList.splice(index, 1);
+      localStorage.setItem('quizzes', JSON.stringify(quizList));
+      updateQuizList();
+      updatePaperQuestions();
+    }
+
+    function deletePaper(index) {
+      paperList.splice(index, 1);
+      localStorage.setItem('papers', JSON.stringify(paperList));
+      updatePaperList();
+    }
+
+    $('#question-type').change(function () {
+      const type = $(this).val();
+      const optionsContainer = $('#options-container');
+      optionsContainer.empty();
+      if (type === 'single' || type === 'multiple') {
+        for (let i = 0; i < 4; i++) {
+          optionsContainer.append(`
+            <div class="form-group">
+              <label for="option-${i}">选项 ${i + 1}</label>
+              <input type="text" class="form-control" id="option-${i}" name="option-${i}">
+            </div>
+          `);
+        }
+      }
+    });
+
+    $('#quiz-form').submit(function (event) {
+      event.preventDefault();
+      const type = $('#question-type').val();
+      const text = $('#question-text').val();
+      let options = [];
+      if (type === 'single' || type === 'multiple') {
+        options = [
+          $('#option-0').val(),
+          $('#option-1').val(),
+          $('#option-2').val(),
+          $('#option-3').val()
+        ];
+      }
+      const answer = $('#answer').val();
+      const quiz = { type, text, options, answer };
+      addQuiz(quiz);
+      $('#quiz-form')[0].reset();
+    });
+
+    $('#paper-form').submit(function (event) {
+      event.preventDefault();
+      const title = $('#paper-title').val();
+      const selectedQuestions = $('#paper-questions').val().map(i => quizList[i]);
+      const randomize = $('#randomize-answers').is(':checked');
+      const review = $('#allow-review').is(':checked');
+      const backtrack = $('#allow-backtrack').is(':checked');
+      const paper = { title, selectedQuestions, randomize, review, backtrack };
+      addPaper(paper);
+      $('#paper-form')[0].reset();
+    });
+
+    updateQuizList();
+    updatePaperList();
+    updatePaperQuestions();
+  });
+</script>
+</body>
+
+</html>

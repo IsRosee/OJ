@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验问题平台首页</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/all.min.css}" rel="stylesheet">
+    <style>
+        .navbar-nav a {
+            margin-right: 15px;
+        }
+
+        .experiment-item {
+            transition: background-color 0.3s;
+        }
+
+        .experiment-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .notification {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 页首 -->
+<!-- 页首 -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">实验平台</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto" id="navItems">
+            <li class="nav-item">
+                <a class="nav-link" href="/index">首页</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/experiment">实验问题</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/notification">课程通知</a>
+            </li>
+            <li class="nav-item" id = "testNavItem">
+                <a class="nav-link" href="/test">自测题库</a>
+            </li>
+            <li class="nav-item" id="loginNavItem">
+                <a class="nav-link" href="/login">注册登录</a>
+            </li>
+
+            <li class="nav-item" id="searchNavItem">
+                <form class="form-inline" th:action="@{/search}" method="get">
+                    <input class="form-control mr-sm-2" type="search" placeholder="搜索" aria-label="搜索" name="query">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜索</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<!-- 内容 -->
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h2>实验问题列表</h2>
+            <div class="list-group" id="experiment-list">
+                <!--                <a href="#" class="list-group-item list-group-item-action experiment-item">实验问题1</a>-->
+                <!--                <a href="#" class="list-group-item list-group-item-action experiment-item">实验问题2</a>-->
+                <!--                <a href="#" class="list-group-item list-group-item-action experiment-item">实验问题3</a>-->
+                <!-- 新发布的实验问题将出现在这里 -->
+            </div>
+        </div>
+        <div class="col-md-4">
+            <h2>课程通知</h2>
+            <ul class="list-group" id="notification-list">
+                <!--                <li class="list-group-item">课程通知1</li>-->
+                <!--                <li class="list-group-item">课程通知2</li>-->
+                <!--                <li class="list-group-item">课程通知3</li>-->
+                <!-- 新发布的课程通知将出现在这里 -->
+            </ul>
+        </div>
+    </div>
+    <div class="row mt-5">
+        <div class="col-md-12">
+            <h2>发布课程通知（必须教师账号登录）</h2>
+            <form id="notification-form">
+                <div class="form-group">
+                    <label for="notification-title">通知标题</label>
+                    <input type="text" class="form-control" id="notification-title" required>
+                </div>
+                <div class="form-group">
+                    <label for="notification-content">通知内容</label>
+                    <textarea class="form-control" id="notification-content" rows="3" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">发布通知</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 页脚 -->
+<footer class="bg-light text-center text-lg-start mt-5">
+    <div class="text-center p-3">
+        © 2024 实验平台. 保留所有权利.
+    </div>
+</footer>
+
+<!-- 动态提示框 -->
+<div class="notification" id="notification">
+    有新的课程通知或实验问题更新！
+</div>
+
+<script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+<script th:src="@{/js/popper.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/showUser.js}"></script>
+<script th:src="@{/js/showExperimentNotification.js}"></script>
+<script>
+    $(document).ready(function () {
+        // 处理表单提交
+        $('#notification-form').on('submit', function (e) {
+            e.preventDefault();
+
+            const title = $('#notification-title').val();
+            const content = $('#notification-content').val();
+
+            const notificationData = {title, content};
+            const token = localStorage.getItem('jwt');
+            console.log(token);
+            fetch('/api/notifications', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify(notificationData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error(text)
+                        });
+                    }
+                    console.log(response);
+                    return response;
+                })
+                .then(data => {
+                    flashTwoLists();
+                    $('#notification').fadeIn().delay(1000).fadeOut();
+                    $('#notification-form')[0].reset();
+
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to create notification: ' + error.message);
+                });
+        });
+    });
+</script>
+</body>
+</html>

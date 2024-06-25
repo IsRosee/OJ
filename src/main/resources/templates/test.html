@@ -1,0 +1,1184 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>实验平台自测题库</title>
+  <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+  <link th:href="@{/css/all.min.css}" rel="stylesheet">
+  <link th:href="@{/css/nav.css}" rel="stylesheet">
+  <!--  <link rel="stylesheet" href="http://172.31.73.236/resource/css/11-1.css" />-->
+  <style>
+    /* 整体样式 */
+    /* 导航栏样式 */
+    .navbar-nav a {
+      margin-right: 15px;
+    }
+
+    .form-check-inline .form-check-input {
+      margin-left: 10px;
+    }
+
+    /*body {*/
+    /*  font-family: Arial, sans-serif;*/
+    /*  background-color: #f8f9fa;*/
+    /*  color: #333;*/
+    /*}*/
+
+    h1,
+    h2 {
+      color: #007bff;
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .container {
+      margin-top: 30px;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+    }
+
+    .form-item {
+      margin-bottom: 15px;
+    }
+
+    .form-item label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+
+    .form-item input[type="text"],
+    .form-item select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ced4da;
+      border-radius: 4px;
+    }
+
+    .inline-checkbox {
+      display: flex;
+      align-items: center;
+    }
+
+    .inline-checkbox input[type="checkbox"] {
+      margin-left: 0;
+      margin-right: 5px;
+    }
+
+    input[type="submit"] {
+      background-color: #28a745;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    input[type="submit"]:hover {
+      background-color: #218838;
+    }
+
+    #questionTable {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    #questionTable th,
+    #questionTable td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    #questionTable th {
+      background-color: #f2f2f2;
+    }
+
+    .btn-outline-success {
+      border-color: #28a745;
+      color: #28a745;
+    }
+
+    .btn-outline-success:hover {
+      background-color: #28a745;
+      color: #fff;
+    }
+
+    .addForm {
+      margin-bottom: 20px;
+      min-height: 250px;
+      font-size: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .addForm label {
+      display: inline-block;
+      width: 100px;
+    }
+
+    .addForm input[type="text"],
+    .addForm input[type="submit"],
+    .addForm select {
+      width: 300px;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+
+    .addForm input[type="submit"] {
+      margin: 0 auto;
+      cursor: pointer;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    table th,
+    table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+
+    }
+
+    table th {
+      background-color: #f2f2f2;
+      min-width: 50px;
+    }
+
+    table td:last-child {
+      text-align: center;
+    }
+
+    button {
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #ddd;
+    }
+
+    .container {
+      display: flex;
+      justify-content: space-around;
+      align-items: top;
+    }
+
+    .module {
+      border-radius: 10px;
+      padding: 15px;
+      background-color: #f2f2f2;
+      width: 500px;
+      margin-bottom: 20px;
+    }
+
+    .form-item {
+      margin-bottom: 1rem;
+    }
+
+
+    .addForm select {
+      width: 300px;
+      padding: 8px;
+      margin-bottom: 10px;
+    }
+
+
+    .delete-btn {
+      background-color: #ff4d4f;
+      color: #fff;
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+      text-decoration: none;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .delete-btn:hover {
+      background-color: #ff7875;
+    }
+
+    .delete-btn:active {
+      background-color: #f5222d;
+
+    }
+
+    .inline-checkbox {
+      display: inline flex;
+      width: 300px;
+      justify-content: space-between;
+    }
+
+    .inline-checkbox label {
+      width: auto;
+    }
+
+    /* 答题按钮样式 */
+    .answerButton {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+      text-decoration: none;
+      color: #fff;
+      background-color: #007bff;
+      border: 2px solid #007bff;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+    .answerButton:hover {
+      background-color: #0056b3;
+      border-color: #0056b3;
+    }
+
+    .answerButton:active {
+      background-color: #0056b3;
+      border-color: #0056b3;
+      transform: translateY(1px);
+    }
+
+    /* 发布按钮样式 */
+    .publishButton {
+     border: none;
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+      text-decoration: none;
+      color: #fff;
+      background-color: #28a745;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+
+    .publishButton:hover {
+      background-color: #218838;
+      border-color: #218838;
+    }
+
+    .publishButton:active {
+      background-color: #218838;
+      border-color: #218838;
+      transform: translateY(1px);
+    }
+
+
+    .viewAnswersButton {
+      display: inline-block;
+      padding: 6px 12px;
+      font-size: 16px;
+      font-weight: bold;
+      color: #fff;
+      background-color: #3498db;
+      /* 蓝色背景 */
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .viewAnswersButton:hover {
+      background-color: #2980b9;
+      /* 悬停时深一点的蓝色 */
+    }
+
+
+    .answer-results-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .answer-results-table th,
+    .answer-results-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    .ui-dialog {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .disabledButton {
+      background-color: #ccc;
+      border:none;
+      /* 灰色背景 */
+      color: #999;
+      /* 深灰色字体 */
+      cursor: not-allowed;
+      /* 禁用状态的鼠标指针 */
+      pointer-events: none;
+      /* 禁用所有指针事件 */
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- 页首 -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <!--    logo-->
+  <img src="/img/logo.jpg" alt="logo" style="width: 50px; height: 50px;">
+  <a class="navbar-brand" href="#">实验平台</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav ml-auto" id="navItems">
+      <li class="nav-item">
+        <a class="nav-link" href="/index">首页</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/experiment">实验问题</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/notification">课程通知</a>
+      </li>
+      <li class="nav-item" id = "testNavItem">
+        <a class="nav-link" href="/test">自测题库</a>
+      </li>
+      <li class="nav-item" id="loginNavItem">
+        <a class="nav-link" href="/login">注册登录</a>
+      </li>
+
+<!--      <li class="nav-item" id="searchNavItem">-->
+<!--        <form class="form-inline" th:action="@{/search}" method="get">-->
+<!--          <input class="form-control mr-sm-2" type="search" placeholder="搜索" aria-label="搜索" name="query">-->
+<!--          <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜索</button>-->
+<!--        </form>-->
+<!--      </li>-->
+    </ul>
+  </div>
+</nav>
+
+
+<div class="container mt-5">
+  <section class="module">
+    <h2>添加题目</h2>
+    <form id="addForm" class="addForm">
+      <div class="form-item">
+        <label for="content">内容:</label>
+        <input type="text" id="content" name="content" required />
+      </div>
+
+      <div class="form-item">
+        <label for="type">类型:</label>
+        <select id="type" name="type">
+          <option value="判断">判断</option>
+          <option value="单选">单选</option>
+          <option value="多选">多选</option>
+          <option value="填空">填空</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="options-container">
+        <!-- 动态生成选项输入框 -->
+      </div>
+
+      <div class="form-item">
+        <label for="tags">标签:</label>
+        <div class="inline-checkbox">
+
+          <input type="checkbox" id="html" name="tags" value="HTML" checked />
+          <label for="html">HTML</label>
+          <input type="checkbox" id="css" name="tags" value="CSS" />
+          <label for="css">CSS</label>
+          <input type="checkbox" id="js" name="tags" value="JavaScript" />
+          <label for="js">JavaScript</label>
+        </div>
+      </div>
+
+      <div class="form-item">
+        <label for="answer">答案:</label>
+        <input type="text" id="answer" name="answer" required />
+      </div>
+
+      <input type="submit" value="添加" />
+    </form>
+  </section>
+
+  <section class="module">
+    <h2>查询题目</h2>
+    <form id="searchForm" class="addForm">
+      <div class="form-item">
+        <label for="searchContent">内容包含:</label>
+        <input type="text" id="searchContent" name="searchContent" />
+      </div>
+
+      <div class="form-item">
+        <label for="searchType">类型:</label>
+        <select id="searchType" name="searchType">
+          <option value="">全部</option>
+          <option value="判断">判断</option>
+          <option value="单选">单选</option>
+          <option value="多选">多选</option>
+          <option value="填空">填空</option>
+        </select>
+      </div>
+
+      <div class="form-item">
+        <label for="searchTags">标签限定:</label>
+        <div class="inline-checkbox">
+          <input type="checkbox" id="searchHtml" name="searchTags" value="HTML" />
+          <label for="searchHtml">HTML</label>
+          <input type="checkbox" id="searchCss" name="searchTags" value="CSS" />
+          <label for="searchCss">CSS</label>
+          <input type="checkbox" id="searchJs" name="searchTags" value="JavaScript" />
+          <label for="searchJs">JavaScript</label>
+        </div>
+      </div>
+
+      <input type="submit" value="查询" />
+    </form>
+  </section>
+
+</div>
+
+<!--<h2>题库列表</h2>-->
+
+
+<div class="row mt-5" style="width:80%; margin: 0 auto;">
+  <div class="col-md-12">
+    <h2>生成自测试卷</h2>
+    <form id="paper-form">
+      <div class="form-group">
+        <label for="paper-title">试卷标题</label>
+        <input type="text" class="form-control" id="paper-title" name="paper-title">
+      </div>
+      <div class="form-group">
+        <label for="questionTable">题库列表</label>
+        <!--        <select multiple class="form-control" id="paper-questions" name="paper-questions">-->
+        <!--          &lt;!&ndash; 动态生成题目选项 &ndash;&gt;-->
+        <!--        </select>-->
+        <table id="questionTable">
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>内容</th>
+            <th>类型</th>
+            <th>选项</th>
+            <th>标签</th>
+            <th>答案</th>
+            <th>删除</th>
+            <th>选择</th>
+          </tr>
+          </thead>
+          <tbody id="questionList"></tbody>
+        </table>
+
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="checkbox" id="randomize-answers" value="randomize"
+               name="randomize-answers">
+        <label class="form-check-label" for="randomize-answers">随机排列答案</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="checkbox" id="allow-review" value="review" name="allow-review">
+        <label class="form-check-label" for="allow-review">允许查看答案</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="checkbox" id="allow-backtrack" value="backtrack" name="allow-backtrack">
+        <label class="form-check-label" for="allow-backtrack">允许回退答题</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="checkbox" id="randomize-questions" name="randomize-questions">
+        <label class="form-check-label" for="randomize-questions">随机选择题目</label>
+      </div>
+      <button type="submit" class="btn btn-primary">生成试卷</button>
+    </form>
+  </div>
+</div>
+
+<div class="row mt-5" style="width:80%; margin: 0 auto;">
+  <div class="col-md-12">
+    <h2>试卷列表</h2>
+    <table id="paperTable">
+      <thead>
+      <tr>
+        <th>试卷ID</th>
+        <th>试卷标题</th>
+        <th>题目列表</th>
+        <th>是否随机排列答案</th>
+        <th>是否允许查看答案</th>
+        <th>是否允许回退答题</th>
+        <th>答题</th>
+        <th>删除</th>
+        <th>发布</th>
+        <th>答题情况</th>
+      </tr>
+      </thead>
+      <tbody id="paperList"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 答题情况表格 -->
+<div class="row mt-5" style="width:80%; margin: 0 auto;" id="answerResultsDialog">
+  <div class="col-md-12">
+    <h2>答题情况</h2>
+    <table id="answerResultsTable" class="answer-results-table">
+      <thead>
+      <tr>
+        <th>姓名</th>
+        <th>学号</th>
+        <th>答对题数</th>
+        <th>总题数</th>
+        <th>正确率</th>
+      </tr>
+      </thead>
+      <tbody>
+      <!-- 这里的内容将由JavaScript动态填充 -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+
+<!-- 页脚 -->
+<footer class="bg-light text-center text-lg-start mt-5">
+  <div class="text-center p-3">
+    © 2024 实验平台. 保留所有权利.
+  </div>
+</footer>
+
+<script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+<script th:src="@{/js/popper.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/showUser.js}"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.1/jquery-ui.min.js"></script>
+
+
+
+<script>
+    $('#type').change(function () {
+      const type = $(this).val();
+      const optionsContainer = $('#options-container');
+      optionsContainer.empty();
+      if (type === '单选' || type === '多选') {
+        for (let i = 0; i < 4; i++) {
+          optionsContainer.append(`
+            <div class="form-group">
+              <label for="option-${i}">选项 ${i + 1}</label>
+              <input type="text" class="form-control" id="option-${i}" name="option-${i}">
+            </div>
+          `);
+        }
+      }
+    });
+
+
+    let db;
+    const DB_NAME = "webDatabase_2021110246";
+    const DB_VERSION = 1;
+    const QUESTION_STORE_NAME = "questions";
+
+    // 创建数据库
+    function createDatabase() {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+      request.onerror = function (event) {
+        console.error("Failed to open database", event.target.error);
+      };
+
+      request.onupgradeneeded = function (event) {
+        const db = event.target.result;
+
+        // 创建题目存储空间
+        const questionStore = db.createObjectStore(QUESTION_STORE_NAME, { keyPath: "id", autoIncrement: true });
+        questionStore.createIndex("contentIndex", "content", { unique: false });
+        questionStore.createIndex("typeIndex", "type", { unique: false });
+        questionStore.createIndex("optionIndex", "options", { unique: false });
+        questionStore.createIndex("tagsIndex", "tags", { unique: false });
+        questionStore.createIndex("answerIndex", "answer", { unique: false });
+      };
+
+      request.onsuccess = function (event) {
+        db = event.target.result;
+        readData();
+      };
+    }
+
+
+
+
+    // 增加数据
+    function addData(event) {
+      event.preventDefault(); // 阻止表单默认提交行为
+
+      const content = document.getElementById("content").value;
+      const type = document.getElementById("type").value;
+      const tags = [];
+      document.querySelectorAll('input[name="tags"]:checked').forEach((tag) => {
+        tags.push(tag.value);
+      });
+      let options = [];
+      if (type === '单选' || type === '多选') {
+        options = [
+          $('#option-0').val(),
+          $('#option-1').val(),
+          $('#option-2').val(),
+          $('#option-3').val()
+        ];
+      }
+
+      const answer = document.getElementById("answer").value;
+
+      const transaction = db.transaction([QUESTION_STORE_NAME], "readwrite");
+      const questionStore = transaction.objectStore(QUESTION_STORE_NAME);
+
+      const question = {
+        content: content,
+        type: type,
+        options: options,
+        tags: tags,
+        answer: answer,
+      };
+
+      const request = questionStore.add(question);
+
+      request.onsuccess = function (event) {
+        console.log("Question added to the database");
+        document.getElementById("addForm").reset(); // 清空表单
+        readData(); // 重新展示数据
+      };
+
+      request.onerror = function (event) {
+        console.error("Failed to add question", event.target.error);
+      };
+    }
+
+    // 创建读取数据事务，并且调用displayData进行展示
+    function readData() {
+      const transaction = db.transaction([QUESTION_STORE_NAME], "readonly");
+      const questionStore = transaction.objectStore(QUESTION_STORE_NAME);
+
+      const request = questionStore.getAll();
+
+      request.onsuccess = function (event) {
+        const data = event.target.result;
+        displayData(data);
+      };
+
+      request.onerror = function (event) {
+        console.error("Failed to read data", event.target.error);
+      };
+    }
+
+    // 展示数据
+    function displayData(data) {
+      let questionList = document.getElementById("questionList");
+      questionList.innerHTML = "";
+
+      data.forEach((item) => {
+        let row = document.createElement("tr");
+
+        // 创建td单元格，分别展示题目内容、类型、标签、答案
+        let idCell = document.createElement("td");
+        idCell.textContent = item.id;
+        row.appendChild(idCell);
+
+
+        let contentCell = document.createElement("td");
+        contentCell.textContent = item.content;
+        row.appendChild(contentCell);
+
+        let typeCell = document.createElement("td");
+        typeCell.textContent = item.type;
+        row.appendChild(typeCell);
+
+        let optionCell = document.createElement("td");
+        optionCell.textContent = item.options.join(", ");
+        row.appendChild(optionCell);
+
+        let tagsCell = document.createElement("td");
+        tagsCell.textContent = item.tags.join(", ");
+        row.appendChild(tagsCell);
+
+        let answerCell = document.createElement("td");
+        answerCell.textContent = item.answer;
+        row.appendChild(answerCell);
+
+        // 创建td单元格，添加删除button，增加类名`delete-btn` ，点击后能够携参调用deleteData
+        let deleteCell = document.createElement("td");
+        let deleteButton = document.createElement("button");
+        deleteButton.textContent = "删除";
+        deleteButton.className = "delete-btn";
+        deleteButton.addEventListener("click", function (event) {
+          deleteData(event, item.id);
+        });
+        deleteCell.appendChild(deleteButton);
+        row.appendChild(deleteCell);
+
+        // 创建选择题库按钮：
+        let rodioCell = document.createElement("td");
+        let radioBtn = document.createElement('input');
+        radioBtn.type = 'checkbox';
+        radioBtn.name = 'quiz';
+        radioBtn.value = item.id;
+        rodioCell.appendChild(radioBtn);
+        row.appendChild(rodioCell);
+
+        questionList.appendChild(row);
+
+      });
+    }
+
+    // 弹出确认框，确认后才删除，删除后重新展示数据
+    function deleteData(event, id) {
+      event.preventDefault(); // 阻止表单提交行为
+
+      const transaction = db.transaction([QUESTION_STORE_NAME], "readwrite");
+      const questionStore = transaction.objectStore(QUESTION_STORE_NAME);
+
+      const request = questionStore.delete(id);
+
+      request.onsuccess = function (event) {
+        console.log("Question deleted from the database");
+        readData(); // 重新展示数据
+      };
+
+      request.onerror = function (event) {
+        console.error("Failed to delete question", event.target.error);
+      };
+    }
+
+
+    // 查询逻辑
+    function handleSearch(event) {
+      event.preventDefault();
+
+      const searchContent = document.getElementById("searchContent").value;
+      const searchType = document.getElementById("searchType").value;
+      const searchTags = [];
+      document.querySelectorAll('input[name="searchTags"]:checked').forEach((tag) => {
+        searchTags.push(tag.value);
+      });
+
+      const transaction = db.transaction([QUESTION_STORE_NAME], "readonly");
+      const questionStore = transaction.objectStore(QUESTION_STORE_NAME);
+      const index = questionStore.index("contentIndex");
+
+      const range = IDBKeyRange.lowerBound(searchContent);
+      const request = index.openCursor(range);
+
+      let filteredData = [];
+
+      request.onsuccess = function (event) {
+        const cursor = event.target.result;
+
+
+        if (cursor) {
+          const question = cursor.value;
+          console.log(question);
+
+          // 检查当前题目是否满足搜索条件
+          const isMatch =
+            (searchContent === "" || question.content.includes(searchContent)) &&
+            (searchType === "" || question.type === searchType) &&
+            (searchTags.length === 0 || searchTags.every((tag) => question.tags.includes(tag)));
+
+          if (isMatch) {
+            filteredData.push(question);
+          }
+
+
+          cursor.continue();
+        } else {
+          // 遍历结束后，显示搜索结果
+          displayData(filteredData);
+        }
+      };
+
+      request.onerror = function (event) {
+        console.error("Failed to search questions", event.target.error);
+      };
+    }
+
+    document.getElementById("paper-form").addEventListener("submit", function (event) {
+      // 阻止表单默认提交行为
+      event.preventDefault();
+
+      // 获取 randomizeQuestions 复选框的状态
+      const randomizeQuestions = document.getElementById("randomize-questions").checked;
+
+      // 调用 addPaper 函数并传入 randomizeQuestions 参数
+      addPaper(randomizeQuestions);
+    });
+
+    function addPaper(randomizeQuestions) {
+      const paperTitle = document.getElementById("paper-title").value;
+      const randomizeAnswers = document.getElementById("randomize-answers").checked;
+      const allowReview = document.getElementById("allow-review").checked;
+      const allowBacktrack = document.getElementById("allow-backtrack").checked;
+
+      let selectedQuestionIds = [];
+
+      if (!randomizeQuestions) {
+        // 当 randomizeQuestions 为 false 时，只获取被选择的题目 ID
+        selectedQuestionIds = Array.from(document.querySelectorAll('input[name="quiz"]:checked')).map(input => input.value);
+      } else {
+        // 当 randomizeQuestions 为 true 时，随机选择部分题目
+        const allQuestionInputs = document.querySelectorAll('input[name="quiz"]');
+        const allQuestionIds = Array.from(allQuestionInputs).map(input => input.value);
+        const totalQuestions = allQuestionIds.length;
+
+        // 生成随机数确定要选择的题目数量
+        const numQuestionsToSelect = getRandomInt(1, totalQuestions + 1); // 生成一个1到总题目数之间的随机整数
+
+        // 从所有题目中随机选择题目的 ID
+        selectedQuestionIds = getRandomElements(allQuestionIds, numQuestionsToSelect);
+      }
+
+      console.log(selectedQuestionIds);
+
+      // 检查是否有选择的题目
+      if (selectedQuestionIds.length === 0) {
+        alert("请至少选择一个题目！");
+        return; // 如果没有选择题目，停止执行函数
+      }
+
+      // 生成唯一的试卷ID，可以使用当前时间戳
+      const paperId = Date.now().toString();
+
+      // 将选中的题目ID列表和其他选项存储到localStorage中
+      const paper = {
+        id: paperId,
+        title: paperTitle,
+        totalQuestions: selectedQuestionIds.length,
+        questions: selectedQuestionIds,
+        randomizeAnswers: randomizeAnswers,
+        allowReview: allowReview,
+        allowBacktrack: allowBacktrack
+      };
+
+      // 获取localStorage中的现有试卷列表或初始化为空数组
+      const papers = JSON.parse(localStorage.getItem('papers')) || [];
+      papers.push(paper);
+      localStorage.setItem('papers', JSON.stringify(papers));
+
+      // 更新表格
+      updatePaperList();
+    }
+
+    // 辅助函数：从数组中随机选择指定数量的元素
+    function getRandomElements(array, numElements) {
+      const shuffledArray = array.slice(); // 复制数组，避免修改原数组
+      for (let i = shuffledArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledArray[i], shuffledArray[j]] = [shuffledArray[j], shuffledArray[i]];
+      }
+      return shuffledArray.slice(0, numElements);
+    }
+
+    // 辅助函数：生成指定范围内的随机整数（包括最小值，不包括最大值）
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min)) + min;
+    }
+
+
+
+
+// 全局变量或状态管理对象，用于记录按钮的禁用状态
+let buttonState = "disabled";
+
+function updatePaperList() {
+    console.log('updatePaper');
+    const paperListContainer = document.getElementById("paperList");
+    paperListContainer.innerHTML = ""; // 清空表格
+
+    const papers = JSON.parse(localStorage.getItem('papers'));
+
+    // 如果localStorage中存在paper列表，则更新表格
+    if (papers) {
+        papers.forEach(paper => {
+            const newRow = document.createElement("tr");
+            const paperIdCell = document.createElement("td");
+            const paperTitleCell = document.createElement("td");
+            const questionListCell = document.createElement("td");
+            const randomizeAnswersCell = document.createElement("td");
+            const allowReviewCell = document.createElement("td");
+            const allowBacktrackCell = document.createElement("td");
+            const answerCell = document.createElement("td");
+            const deleteCell = document.createElement("td");
+            const submitCell = document.createElement("td");
+            const viewCell = document.createElement("td");
+
+            // 设置试卷ID
+            paperIdCell.textContent = paper.id;
+            newRow.appendChild(paperIdCell);
+
+            // 设置试卷名称
+            paperTitleCell.textContent = paper.title;
+            newRow.appendChild(paperTitleCell);
+
+            // 设置题目列表
+            const questionList = paper.questions.join(', ');
+            questionListCell.textContent = questionList;
+            newRow.appendChild(questionListCell);
+
+            // 设置是否随机排列答案
+            randomizeAnswersCell.textContent = paper.randomizeAnswers ? "是" : "否";
+            newRow.appendChild(randomizeAnswersCell);
+
+            // 设置是否允许查看答案
+            allowReviewCell.textContent = paper.allowReview ? "是" : "否";
+            newRow.appendChild(allowReviewCell);
+
+            // 设置是否允许回退答题
+            allowBacktrackCell.textContent = paper.allowBacktrack ? "是" : "否";
+            newRow.appendChild(allowBacktrackCell);
+
+            // 添加答题按钮
+            const answerButton = document.createElement("button");
+            answerButton.textContent = "答题";
+            answerButton.className = "answerButton";
+            answerButton.onclick = function () {
+                localStorage.setItem('currentPaperId', paper.id);
+                window.location.href = "testme";
+            };
+            answerCell.appendChild(answerButton);
+            newRow.appendChild(answerCell);
+
+            // 添加删除按钮
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "删除";
+            deleteButton.className = "delete-btn";
+            deleteButton.onclick = function () {
+                deletePaper(paper.id);
+            };
+            deleteCell.appendChild(deleteButton);
+            newRow.appendChild(deleteCell);
+
+            // 添加发布按钮
+            const publishButton = document.createElement("button");
+            publishButton.textContent = "发布";
+            publishButton.className = "publishButton";
+            publishButton.setAttribute("data-paper-id", paper.id); // 使用自定义属性存储 paper.id
+            publishButton.setAttribute("data-role", "teacher"); // 教师角色可以点击发布
+
+            // 根据记录的状态设置按钮的可用性
+            if (buttonState === "disabled") {
+                publishButton.disabled = true;
+                publishButton.classList.add('disabledButton');
+            } else {
+                publishButton.disabled = false;
+                publishButton.classList.remove('disabledButton');
+            }
+
+            publishButton.onclick = function () {
+                const paperId = this.getAttribute("data-paper-id");
+                publishPaper(paperId);
+            };
+            submitCell.appendChild(publishButton);
+            newRow.appendChild(submitCell);
+
+            // 添加查看答题情况按钮
+            const viewAnswersButton = document.createElement("button");
+            viewAnswersButton.textContent = "查看";
+            viewAnswersButton.className = "viewAnswersButton";
+            viewAnswersButton.setAttribute("data-paper-id", paper.id); // 使用自定义属性存储 paper.id
+            viewAnswersButton.setAttribute("data-role", "teacher"); // 教师角色可以查看答题情况
+
+            // 根据记录的状态设置按钮的可用性
+            if (buttonState === "disabled") {
+                viewAnswersButton.disabled = true;
+                viewAnswersButton.classList.add('disabledButton');
+            } else {
+                viewAnswersButton.disabled = false;
+                viewAnswersButton.classList.remove('disabledButton');
+            }
+
+            viewAnswersButton.onclick = function () {
+                const currentPaperId = paper.id;
+                showAnswerResults(currentPaperId);
+            };
+            viewCell.appendChild(viewAnswersButton);
+            newRow.appendChild(viewCell);
+
+            // 将新行添加到表格中
+            paperListContainer.appendChild(newRow);
+        });
+    }
+}
+
+
+
+    // jQuery弹出表格显示答题情况
+    function showAnswerResults(currentPaperId) {
+      const studentsData = JSON.parse(localStorage.getItem(`paper_${currentPaperId}_students`));
+      const Papers = JSON.parse(localStorage.getItem(`papers`));
+      console.log(studentsData);
+      console.log(Papers);
+      var totalQuestions =0;
+      for (let i = 0; i < Papers.length; i++) {
+        if (Papers[i].id === currentPaperId) {
+          totalQuestions = Papers[i].totalQuestions;
+          break;
+        }
+      }
+
+      // 检查数据是否为空
+      if (!studentsData || studentsData.length === 0) {
+        alert('还没有答题情况');
+        return;
+      }
+
+      // 创建表格和表头
+      const table = $('<table>').addClass('answer-results-table');
+      const thead = $('<thead>').appendTo(table);
+      const tbody = $('<tbody>').appendTo(table);
+      const headerRow = $('<tr>').appendTo(thead);
+
+      $('<th>').text('姓名').appendTo(headerRow);
+      $('<th>').text('学号').appendTo(headerRow);
+      $('<th>').text('答对题数').appendTo(headerRow);
+        $('<th>').text('总题数').appendTo(headerRow);
+        $('<th>').text('正确率').appendTo(headerRow);
+
+      // 遍历学生数据，添加行到表格
+      studentsData.forEach(student => {
+        const row = $('<tr>').appendTo(tbody);
+        $('<td>').text(student.name).appendTo(row);
+        $('<td>').text(student.studentNumber).appendTo(row);
+        $('<td>').text(student.correctAnswers).appendTo(row);
+        $('<td>').text(totalQuestions).appendTo(row);
+        $('<td>').text(`${(student.correctAnswers / totalQuestions * 100).toFixed(2)}%`).appendTo(row);
+
+      });
+
+      // 清空答题情况表格内容并填充新内容
+      $('#answerResultsTable tbody').empty().append(tbody.children());
+
+      // 显示答题情况表格
+      $('#answerResultsDialog').show();
+    }
+
+
+
+
+
+    function deletePaper(paperId) {
+      let papers = JSON.parse(localStorage.getItem('papers'));
+      papers = papers.filter(paper => paper.id !== paperId);
+      localStorage.setItem('papers', JSON.stringify(papers));
+      updatePaperList(); // 更新表格
+    }
+
+
+    // 发布试卷函数，发送 paper.id 给后端进行处理
+    function publishPaper(paperId) {
+      const token = localStorage.getItem('jwt');
+
+      // 发布逻辑
+      $.ajax({
+        url: '/api/publish',
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer ' + token // 在请求头中附带 JWT
+        },
+        data: {
+          paperId: paperId // 发送 paper.id
+        },
+        success: function (response) {
+          console.log("发布成功", response);
+          // 可以在成功发布后进行页面重定向或其他操作
+        },
+        error: function (xhr, status, error) {
+          console.error("发布失败", error);
+          // 处理发布失败情况，显示错误信息等
+        }
+      });
+    }
+
+
+$(document).ready(function () {
+    const token = localStorage.getItem('jwt');
+
+    // 发送 AJAX 请求获取用户信息
+    $.ajax({
+        url: '/api/currentUser',
+        method: 'GET',
+        headers: {
+            'Authorization': 'Bearer ' + token // 在请求头中附带 JWT
+        },
+        success: function (response) {
+            console.log(response);
+            const role = response.userType; // 假设用户只有一个角色
+
+            // 根据角色设置按钮的禁用状态
+            $('.publishButton').each(function () {
+                const paperId = $(this).attr('data-paper-id');
+                if (role === "TEACHER") {
+                    buttonState = "enabled";
+                    $(this).prop('disabled', false).removeClass('disabledButton');
+                } else {
+                    buttonState = "disabled";
+                    $(this).prop('disabled', true).addClass('disabledButton');
+                }
+            });
+
+            $('.viewAnswersButton').each(function () {
+                const paperId = $(this).attr('data-paper-id');
+                if (role === "TEACHER") {
+                    buttonState = "enabled";
+                    $(this).prop('disabled', false).removeClass('disabledButton');
+                } else {
+                    buttonState= "disabled";
+                    $(this).prop('disabled', true).addClass('disabledButton');
+                }
+            });
+        },
+        error: function (xhr, status, error) {
+            console.error("获取用户信息失败", error);
+            // 处理错误情况，比如显示提示信息或跳转到登录页面
+            $('.publishButton').prop('disabled', true).addClass('disabledButton');
+            $('.viewAnswersButton').prop('disabled', true).addClass('disabledButton');
+        }
+    });
+});
+
+
+
+    // 绑定事件处理函数
+    document.getElementById("searchForm").addEventListener("submit", handleSearch);
+    document.getElementById("addForm").addEventListener("submit", addData);
+
+    // 初始化页面时创建数据库，读取数据
+    createDatabase();
+
+    window.addEventListener('load', function () {
+      updatePaperList();
+    });
+
+
+    // 校验限定
+    window.db = db;
+  </script>
+</body>
+
+</html>

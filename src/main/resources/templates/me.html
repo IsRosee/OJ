@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验问题平台首页</title>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/all.min.css}" rel="stylesheet">
+    <link th:href="@{/css/nav.css}" rel="stylesheet">
+
+<!--    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">-->
+    <!-- 引入Bootstrap JavaScript和依赖的Popper.js和jQuery -->
+<!--    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.9.3/dist/umd/popper.min.js"></script>-->
+<!--    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>-->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+
+    <style>
+        .navbar-nav a {
+            margin-right: 15px;
+        }
+
+        .experiment-item {
+            transition: background-color 0.3s;
+        }
+
+        .experiment-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .
+        .notification {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #28a745;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .nav-item dropdown {
+            aria-expanded: true;
+        }
+        .hxy_avatar {
+            width: 150px;
+            height: 150px;
+            border-radius: 70px;
+            margin-top: 15px;
+            margin-left: 15px;
+        }
+
+        .nickname {
+            font-size: 35px;
+            margin-left: 45px;
+            margin-top: 15px;
+            display: block;
+        }
+
+        .student_number {
+            font-size: 20px;
+            margin-left: 45px;
+            margin-top: 15px;
+            display: block;
+        }
+
+        .signature {
+            font-size: 20px;
+            margin-left: 45px;
+            margin-top: 20px;
+            display: block;
+        }
+
+        .add_info_button {
+            display: block;
+
+            right: 250px;
+            top: 300px;
+            color: #28a745;
+            border-color: #28a745;
+            border-radius: 5px;
+            padding: 5px;
+            outline: none;
+            border-width: 1px;
+        }
+
+        .hxy_tudo_list {
+            /*background-color: #f3f4f6;*/
+            height: auto;
+            width: auto;
+            /* 文本框宽度将根据内容自动调整 */
+            min-width: 600px;
+            /* 可选，设置文本框的最小宽度 */
+            max-width: 900px;
+            /* 可选，设置文本框的最大宽度 */
+            margin: 10px;
+            border-radius: 20px;
+            color: black;
+            overflow: visible;
+            font-size: 20px;
+        }
+
+        .row {
+
+            padding: 20px;
+        }
+
+        #row_last {
+            padding-bottom: 40px;
+        }
+
+        #add_info_button:hover {
+            color: white;
+            background-color: #28a745;
+        }
+
+        #add_info_button:active {
+            background-color: #28a745;
+            border-color: #4ceb69;
+            outline: none;
+        }
+
+        /* 好像这个没用 */
+        #hxy_head {
+            background-color: white;
+            border-width: 2px;
+            border-color: black;
+        }
+
+        #hxy_row1 {
+            background-color: white;
+            border-radius: 20%;
+        }
+
+        #hxy_content {
+            background-color: white;
+            min-height: 70vh;
+        }
+
+        #hxy_body {
+            background-color: #f2f3f5;
+        }
+
+        .custom-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #000;
+            position: relative;
+            display: inline-block;
+        }
+
+        .custom-checkbox input[type="checkbox"] {
+            opacity: 0;
+
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            cursor: pointer;
+        }
+
+        .custom-checkbox input[type="checkbox"]:checked+.checkmark {
+            background-color: #008000;
+        }
+
+        .custom-checkbox .checkmark {
+
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+        }
+
+        .custom-checkbox input[type="checkbox"]:checked+.checkmark::before {
+            content: '';
+
+            left: 7px;
+            top: 3px;
+            width: 5px;
+            height: 10px;
+            border: solid #fff;
+            border-width: 0 3px 3px 0;
+            transform: rotate(45deg);
+        }
+    </style>
+    <style>
+        .hxy_dialog {
+            position: relative;
+            max-height: 80vh; /* 限制对话框的最大高度 */
+            overflow-y: auto; /* 添加垂直滚动条 */
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .hxy_dialog-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .table-container {
+            max-height: 60vh; /* 限制表格容器的最大高度 */
+            overflow-y: auto; /* 添加垂直滚动条 */
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 45px;
+            cursor: pointer;
+        }
+        .hxy_btn {
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .hxy_btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+
+        /*.hxy_container {*/
+        /*    align-items: center;*/
+        /*    margin: 20px;*/
+        /*}*/
+
+        .hxy_box {
+            border: 1px solid #ddd;
+            padding: 10px;
+            padding-left: 32px;
+            margin-top: -1px;
+            /* 去掉上边框的重叠 */
+            background-color: #fff;
+            width: 350px;
+        }
+
+        .hxy_box:first-child {
+            margin-top: 0;
+            border-radius: 5px;
+            font-size: 20px;
+        }
+
+        #info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px; /* 控制元素之间的间距 */
+        }
+
+        #info_button{
+            align-self: flex-end; /* 将按钮靠右对齐 */
+            margin-top: 20px; /* 给按钮一些顶部的间距 */
+        }
+    </style>
+    <script>
+        // 触发文件上传输入框的点击事件
+        function triggerUpload() {
+            document.getElementById('avatarUpload').click();
+        }
+        // import axios from 'axios';
+
+    </script>
+</head>
+
+<body id="hxy_body">
+
+    <!-- 页首 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light" id="hxy_head">
+        <!--    logo-->
+        <img src="/img/logo.jpg" alt="logo" style="width: 50px; height: 50px;">
+        <a class="navbar-brand" href="#">实验平台</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="true" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto" id="navItems">
+                <li class="nav-item">
+                    <a class="nav-link" href="/index">首页</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/experiment">实验问题</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/notification">课程通知</a>
+                </li>
+                <li class="nav-item" id="testNavItem">
+                    <a class="nav-link" href="/test">自测题库</a>
+                </li>
+                <li class="nav-item" id="loginNavItem">
+                    <a class="nav-link" href="/login">注册登录</a>
+                </li>
+<!--                <li class="nav-item" id="searchNavItem">-->
+<!--                    <form class="form-inline" th:action="@{/search}" method="get">-->
+<!--                        <input class="form-control mr-sm-2" type="search" placeholder="搜索" aria-label="搜索" name="query">-->
+<!--                        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜索</button>-->
+<!--                    </form>-->
+<!--                </li>-->
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 内容 -->
+    <div id="app">
+        <div class="container mt-5" id="hxy_content">
+            <div class="row" style="margin-left: 30px;">
+                <div>
+                    <input type="file" id="avatarUpload" accept="image/*" style="display:none;">
+                    <img id="avatar" class="hxy_avatar" :src="avatarUrl" alt="用户头像" onclick="triggerUpload()">
+                </div>
+                <div id="info">
+                    <span class='nickname'>用户名: <span id="username">{{username}}</span></span>
+                    <span class='student_number'>昵称: <span id="nickname">{{nickname}}</span></span>
+                    <span class='student_number' v-if="roleDisplay == '学生'">学号: <span id="student_number">{{username}}</span></span>
+                    <span class='student_number'>邮箱: <span id="email">{{email}}</span></span>
+                    <span class='signature' >签名档: <span id="signature">{{signature}}</span></span>
+                    <div class="button-group">
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#myModal">修改信息</button>
+                        <button class="btn btn-secondary" data-toggle="modal" data-target="#resetPasswordModal">重置密码</button>
+                    </div>
+                </div>
+
+<!--                重置密码模态框-->
+                <div class="modal fade" id="resetPasswordModal" tabindex="-1" role="dialog" aria-labelledby="resetPasswordModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="resetPasswordModalLabel">重置密码</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+<!--                                <form>-->
+<!--                                    <div class="form-group">-->
+<!--                                        <label for="oldPassword">旧密码</label>-->
+<!--                                        <input type="password" class="form-control" id="oldPassword" placeholder="请输入旧密码">-->
+<!--                                        <label for="newPassword">新密码</label>-->
+<!--                                        <input type="password" class="form-control" id="newPassword" placeholder="请输入新密码">-->
+<!--                                        <label for="confirmPassword">确认密码</label>-->
+<!--                                        <input type="password" class="form-control" id="confirmPassword" placeholder="请再次输入新密码">-->
+<!--                                    </div>-->
+<!--                                </form>-->
+                                <form id="email-form" class="mt-3 needs-validation" novalidate>
+                                    <div class="form-group">
+                                        <label for="email-address">邮箱</label>
+                                        <input type="email" class="form-control" id="email-address" required>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-info" id="send-code-button">发送验证码</button>
+                                    <div class="form-group mt-3">
+                                        <label for="verification-code">验证码</label>
+                                        <input type="text" class="form-control" id="verification-code" required pattern="^\d{6}$">
+                                        <div class="invalid-feedback">请输入6位验证码（5分钟内有效）。</div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="new-password">新密码</label>
+                                        <input type="password" class="form-control" id="new-password" required pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$">
+                                        <div class="invalid-feedback">密码必须至少为6个字符，并且包含字母和数字。</div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary" form="email-form">确认重置密码</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+                <!-- 模态框 -->
+                <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="myModalLabel">填写信息</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <form>
+                                    <div class="form-group" >
+                                        <label for="nickname">昵称:</label>
+                                        <input type="text" class="form-control" id="get_nickname" placeholder="请输入您的昵称">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email">邮箱:</label>
+                                        <input type="text" class="form-control" id="get_email" placeholder="请输入您的邮箱">
+                                    </div>
+                                    <div class="form-group" >
+                                        <label for="signature">签名档:</label>
+                                        <input type="text" class="form-control" id="get_signature"
+                                            placeholder="请输入您的签名档">
+                                    </div>
+
+
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                                <button type="button" class="btn btn-primary" onclick="out_change_info()">保存</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <hr>
+            <div class="row" id="hxy_row1" v-if="roleDisplay == '教师'">
+                <div class="col-md-6" style="margin-left: 10px;">
+                    <h2>学生注册状态</h2>
+                    <p id="registration-status">加载中...</p>
+                    <button class="btn btn-primary" id="toggle-registration-btn"
+                        onclick="change_register()">切换注册状态</button>
+                </div>
+                <hr>
+            </div>
+
+            <div class="row" v-if="roleDisplay == '教师'" >
+                <div class="hxy_container" style="width: 700px;margin-left: 30px;">
+                    <h2 style="margin-bottom: 20px;">所有学生</h2>
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th scope="col">学号</th>
+                            <th scope="col">姓名</th>
+                            <th scope="col">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="item in studentList" :key="item.id">
+                            <td>{{ item.studentNumber }}</td>
+                            <td>{{ item.username }}</td>
+                            <td>
+                                <button class="btn btn-primary btn-sm"
+                                        style="color: rgb(52, 138, 225); text-decoration: underline; background-color: white; border-color: white;"
+                                        @click="set_disabled_in(item.studentNumber)"
+                                        :id="item.studentNumber">{{ item.active }}</button>
+                                <button class="btn btn-primary btn-sm"
+                                        style="color: rgb(52, 138, 225); text-decoration: underline; background-color: white; border-color: white;"
+                                        @click="reset_password(item.studentNumber)">重置密码</button>
+                                <button class="btn btn-primary btn-sm"
+                                        style="color: rgb(225, 52, 52); text-decoration: underline; background-color: white; border-color: white;"
+                                        @click="delete_count(item.id, item.studentNumber)">删除账号</button>
+                                <button class="btn btn-primary btn-sm"
+                                        style="color: rgb(52, 138, 225); text-decoration: underline; background-color: white; border-color: white;"
+                                        @click="openDialog_v2(item.id)">查看实验</button>
+                            </td>
+                        </tr>
+                        <tr v-if="studentList.length === 0">
+                            <td colspan="3" class="text-center">暂无学生</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="hxy_dialog" v-if="dialogVisible_v2" >
+                    <button class="close-btn" @click="closeDialog_v2">&times;</button>
+                    <div class="hxy_dialog-content">
+                        <div class="hxy_container">
+                            <h4 style="margin-bottom: 20px;">待提交实验列表</h4>
+                            <p v-if="pending.length == 0">暂无待提交实验</p>
+                            <div class="hxy_box_container">
+                                <table class="table table-striped">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">实验标题</th>
+                                        <th scope="col">操作</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="pending_item in pending" :key="pending_item.id">
+                                        <td>{{ pending_item.title }}</td>
+                                        <td>
+                                            <button type="button" class="btn btn-primary btn-sm" @click="viewDetail(pending_item.id)">详情</button>
+                                        </td>
+                                    </tr>
+                                    <tr v-if="pending.length === 0">
+                                        <td colspan="2" class="text-center">暂无待提交实验</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="hxy_container">
+                            <h4 style="margin-bottom: 20px;">已提交实验列表</h4>
+                            <p v-if="submitted.length == 0">暂无已提交实验</p>
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th scope="col">实验标题</th>
+                                    <th scope="col">操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr v-for="submitted_item in submitted" :key="submitted_item.id">
+                                    <td>{{ submitted_item.title }}</td>
+                                    <td>
+                                        <a :href="`/experimentDetail/${submitted_item.id}`" class="btn btn-info btn-sm">查看详情</a>
+                                    </td>
+                                </tr>
+                                <tr v-if="submitted.length === 0">
+                                    <td colspan="2" class="text-center">暂无已提交实验</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+            <div class="row" v-if="roleDisplay == '学生'" style="margin-left: 30px;">
+                <div class="col-md-6">
+                    <h2>待办事项</h2>
+                    <div>
+                        <div class="hxy_tudo_list">
+                            <div v-if="todoList.length > 0">
+                                <table class="table table-striped">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">操作</th>
+                                        <th scope="col">待办事项</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="item in todoList" :key="item.id">
+                                        <td>
+                                            <label class="custom-checkbox">
+                                                <input type="checkbox" @click="delete_todu(item.id)">
+                                                <span class="checkmark"></span>
+                                            </label>
+                                        </td>
+                                        <td>{{ item.todu }}</td>
+                                    </tr>
+                                    <tr v-if="todoList.length === 0">
+                                        <td colspan="2" class="text-center">暂无待办事项</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="hxy_dialog" v-if="dialogVisible">
+                                <div class="hxy_dialog-content">
+                                    <p>请输入待办事项</p>
+                                    <input type="text" class="form-control" id="get_todu">
+                                    <button class="btn btn-primary" @click="add_todu" style="margin: 10px;">保存</button>
+
+                                    <button class="btn btn-primary" @click="closeDialog"
+                                        style="margin: 10px;">关闭</button>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" @click="openDialog()">添加待办</button>
+
+                        </div>
+
+                    </div>
+                </div>
+                <hr>
+            </div>
+
+            <hr>
+
+            <div class="row" v-if="roleDisplay == '学生'" style="justify-content: space-around">
+                <div class="hxy_container" style="width: 400px;">
+                    <h2 style="margin-bottom: 20px;">待提交实验列表</h2>
+                    <div class="hxy_box_container">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th scope="col">实验标题</th>
+                                <th scope="col">操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr v-for="item in pending" :key="item.id">
+                                <td>{{ item.title }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-primary btn-sm" @click="viewDetail(item.id)">查看详情</button>
+                                </td>
+                            </tr>
+                            <tr v-if="pending.length === 0">
+                                <td colspan="2" class="text-center">暂无待提交实验</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="hxy_container" style="width: 400px;">
+                    <h2 style="margin-bottom: 20px;">已提交实验列表</h2>
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th scope="col">实验标题</th>
+                            <th scope="col">操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="item in submitted" :key="item.id">
+                            <td>{{ item.title }}</td>
+                            <td>
+                                <a :href="`/experimentDetail/${item.id}`" class="btn btn-info btn-sm">查看详情</a>
+                            </td>
+                        </tr>
+                        <tr v-if="submitted.length === 0">
+                            <td colspan="2" class="text-center">暂无已提交实验</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="bg-light text-center text-lg-start mt-5" id="hxy_footer">
+        <div class="text-center p-3">
+            © 2024 实验平台. 保留所有权利.
+        </div>
+    </footer>
+
+    <script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+    <script th:src="@{/js/popper.min.js}"></script>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+     <script th:src="@{/js/showUser.js}"></script>
+    <script th:src="@{/js/showExperimentNotification.js}"></script>
+    <script>
+        $(document).ready(function () {
+            // Bootstrap validation
+            var forms = $('.needs-validation');
+            forms.each(function () {
+                $(this).on('submit', function (event) {
+                    if (this.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    $(this).addClass('was-validated');
+                });
+            });
+
+            // 失去焦点时验证
+            $('input').on('blur', function () {
+                if (!this.checkValidity()) {
+                    $(this).addClass('is-invalid');
+                } else {
+                    $(this).removeClass('is-invalid');
+                }
+            });
+
+            // Send verification code via AJAX
+            $('#send-code-button').on('click', function () {
+                var emailInput = $('#email-address');
+                if (emailInput[0].checkValidity() === false) {
+                    emailInput.addClass('is-invalid');
+                } else {
+                    emailInput.removeClass('is-invalid');
+                    $.ajax({
+                        type: 'POST',
+                        url: '/verify',
+                        data: { email: emailInput.val() },
+                        success: function (response) {
+                            alert('验证码已发送到您的邮箱');
+                        },
+                        error: function (error) {
+                            alert('发送验证码失败，请重试');
+                        }
+                    });
+                }
+            });
+
+            // Reset password via AJAX
+            $('#email-form').on('submit', function (event) {
+                event.preventDefault();
+                if (this.checkValidity() === false) {
+                    event.stopPropagation();
+                } else {
+                    var emailInput = $('#email-address').val();
+                    var verificationCode = $('#verification-code').val();
+                    var newPassword = $('#new-password').val();
+                    $.ajax({
+                        type: 'POST',
+                        url: '/verify/reset-password',
+                        data: {
+                            email: emailInput,
+                            code: verificationCode,
+                            newPassword: newPassword
+                        },
+                        success: function (response) {
+                            alert('密码重置成功');
+                        },
+                        error: function (error) {
+                            alert('密码重置失败，请重试');
+                        }
+                    });
+                }
+                $(this).addClass('was-validated');
+            });
+        });
+    </script>
+    <script>
+        const app = new Vue({
+            el: '#app',
+            data: {
+                footer: "© 2024 实验平台. 保留所有权利.",
+                dialogVisible: false,
+                dialogVisible_v2: false,
+
+                disabled: '禁用账号',
+                todu_num: 0,
+                todoList: [
+                ],
+                studentList: [],
+                username: "",
+                submitted: [
+                    { id: 1, title: "实验1" },
+                    { id: 2, title: "实验2" }
+                ],
+                pending: [
+
+                ],
+                roleDisplay: "",
+                avatarUrl: "/img/default.jpg",
+                email: "",
+                id: 0,
+                nickname: "",
+                signature: "",
+                studentNumber: "",
+            },
+            methods: {
+                viewDetail(id) {
+                    window.location.href = `/experimentDetail/${id}`;
+                },
+                closeDialog_v2() {
+                    this.dialogVisible_v2 = false;
+
+                },
+                openDialog_v2(user_id) {
+                    this.dialogVisible_v2 = true;
+                    console.log("dialogVisible_v2", this.dialogVisible_v2);
+                    console.log("获取未完成实验", user_id);
+                    axios.get('/api/experiments/no/' + user_id)
+                        .then((response) => {
+                            // 处理成功的情况
+                            this.pending = response.data;
+                            console.log("pendding", this.pending);
+                        })
+                        .catch(function (error) {
+                            // 处理错误的情况
+                            console.log(error);
+                        })
+                    console.log("获取已完成实验", user_id);
+                    axios.get('/api/experiments/ok/' + user_id)
+                        .then((response) => {
+                            // 处理成功的情况
+                            this.submitted = response.data;
+                            console.log("submitted", this.submitted);
+                        })
+                        .catch(function (error) {
+                            // 处理错误的情况
+                            console.log(error);
+                        })
+
+
+                },
+                delete_count(user_id, studentNumber) {
+                    //默认重置成学生的学号
+                    const confirmation = confirm(`您确定要删除 ${studentNumber} 的账号吗？此操作不可撤销。`);
+                    if (confirmation) {
+                        console.log(this.studentList);
+                        alert(`已删除 ${studentNumber} 的账号。`);
+                        axios.delete('/api/user/' + user_id)
+                            .then((response) => {
+                                // 处理成功的情况
+                                this.studentList = this.studentList.filter(item => item.studentNumber != studentNumber);
+                                console.log("delete:", response.data);
+                                console.log(" this.studentList:", this.studentList);
+                            })
+                            .catch(function (error) {
+                                // 处理错误的情况
+                                console.log(error);
+                            })
+                    }
+                },
+
+                reset_password(studentNumber) {
+                    //默认重置成学生的学号+a
+                    const confirmation = confirm(`您确定要重置 ${studentNumber} 的账号吗？此操作不可撤销。`);
+                    if (confirmation) {
+                        // // 重置学生默认密码
+                    // @PutMapping("/user/{id}/reset-password")
+                    //     public ResponseEntity<?> resetPassword(@PathVariable Long id) {
+                    //         userService.resetDefaultPassword(id);
+                    //         return ResponseEntity.ok().build();
+                    //     }
+                        axios.put('/api/user/' + item.id + '/reset-password')
+                            .then((response) => {
+                                // 处理成功的情况
+                                console.log("reset_password", response.data);
+                                alert(`已重置 ${studentNumber} 的密码。`);
+                            })
+                            .catch(function (error) {
+                                // 处理错误的情况
+                                console.log(error);
+                                alert("重置失败");
+                            })
+                    }
+                },
+                set_disabled_in(studentNumber) {
+                    console.log("disabled_studentNumber", studentNumber)
+                    this.studentList.forEach(item => {
+                        if (item.studentNumber == studentNumber) {
+                            console.log('active', item.active);
+                            if (item.active == '禁用账号') {
+                                const confirmation = confirm(`您确定要禁用 ${studentNumber} 的账号吗？`);
+                                if (confirmation) {
+                                    // 发起请求
+                                    axios.put('/api/user/' + item.id + '/disable')
+                                        .then((response) => {
+                                            // 处理成功的情况
+                                            console.log("禁用成功", response.data);
+                                            item.active = '取消禁用';
+                                            alert(`已禁用${studentNumber} 的账号`);
+                                        })
+                                        .catch(function (error) {
+                                            // 处理错误的情况
+                                            console.log(error);
+                                            alert("禁用失败");
+                                        })
+                                }
+                            } else {
+                                const confirmation = confirm(`您确定要取消禁用 ${studentNumber} 的账号吗？`);
+                                if (confirmation) {
+                                    // 发起请求
+                                    axios.put('/api/user/' + item.id + '/enable')
+                                        .then((response) => {
+                                            // 处理成功的情况
+                                            console.log("取消禁用成功", response.data);
+                                            item.active = '禁用账号';
+                                            alert(`已取消禁用${studentNumber} 的账号`);
+                                        })
+                                        .catch(function (error) {
+                                            // 处理错误的情况
+                                            console.log(error);
+                                            alert("取消禁用失败");
+                                        })
+                                }
+                            }
+                            console.log('active', item.active);
+                        }
+                    });
+                    //预留接口
+                },
+                get_student() {
+                    axios.get('/api/students')
+                        .then((response) => {
+                            // 处理成功的情况
+                            this.studentList = response.data;
+                            this.studentList.forEach(item => {
+                                item.active = item.active ? '禁用账号' : '取消禁用';
+                            });
+                            console.log("studentList", response.data);
+                        })
+                        .catch(function (error) {
+                            // 处理错误的情况
+                            console.log(error);
+                        })
+                },
+                show_info(response, roleDisplay) {
+                    console.log("info:");
+
+                    this.roleDisplay = roleDisplay;
+                    console.log("roleDisplay", this.roleDisplay);
+                    if (roleDisplay == '教师') {
+                        console.log("获取学生信息");
+                        this.get_student();
+                    }
+                    this.email = response.email;
+                    console.log("email", this.email);
+                    // this.todoList = response.todoList;
+                    // console.log("todoList", this.todoList);
+                    if (response.avatarUrl)
+                        this.avatarUrl = response.avatarUrl;
+                    console.log("avatarUrl", this.avatarUrl);
+                    this.email = response.email;
+                    console.log("email", this.email);
+                    this.id = response.id;
+                    console.log("id", this.id);
+                    this.get_todu(this.id);
+
+                    this.nickname = response.nickname;
+                    console.log("nickname", this.nickname);
+                    this.signature = response.signature;
+                    console.log("signature", this.signature);
+                    this.studentNumber = response.studentNumber;
+                    console.log("studentNumber", this.studentNumber);
+                    this.username = response.username;
+                    console.log("username", this.username);
+                },
+
+                openDialog() {
+                    this.dialogVisible = true;
+                    console.log("dialogVisible", this.dialogVisible);
+                },
+                closeDialog() {
+                    this.dialogVisible = false;
+                },
+                get_todu(user_id) {
+                    let request = indexedDB.open('toduDatabase_v2', 1);
+
+                    request.onupgradeneeded = function (event) {
+                        let db = event.target.result;
+                        if (!db.objectStoreNames.contains('todus')) {
+                            db.createObjectStore('todus', { keyPath: 'id', autoIncrement: true });
+                        }
+                    };
+
+                    request.onsuccess = (event) => {  // 使用箭头函数
+                        let db = event.target.result;
+                        let transaction = db.transaction(['todus'], 'readonly');
+                        let objectStore = transaction.objectStore('todus');
+                        const cursorRequest = objectStore.openCursor();
+
+                        this.todoList = []; // 清空列表，防止重复添加
+                        cursorRequest.onsuccess = (event) => {  // 使用箭头函数
+                            const cursor = event.target.result;
+                            if (cursor && cursor.value && cursor.value.id) {
+                                // 处理游标当前的记录
+                                // console.log("cursor.value", cursor.value);
+                                // console.log("cursor.value.id", cursor.value.id);
+                                // console.log("user_id", user_id);
+                                if (cursor.value.user_id == user_id) {
+                                    // console.log('添加进todoList');
+                                    this.todoList.push(cursor.value); // this 指向 Vue 实例
+                                }
+                                cursor.continue(); // 游标继续
+                            } else {
+                                // 所有记录已经遍历完毕
+                                console.log('所有todoList记录已遍历完毕');
+                                console.log(this.todoList.length);
+                            }
+                        };
+
+                        transaction.oncomplete = function () {
+                            db.close();
+                        };
+                    };
+
+                    request.onerror = function (event) {
+                        console.log("Database error: " + event.target.errorCode);
+                    };
+                },
+                delete_todu(id) {
+                    console.log("this.id", this.id);
+                    console.log("删除", id);
+                    // 确认删除
+                    if (!confirm('确定要删除这个待办事项吗？')) {
+                        return;
+                    }
+                    let request = indexedDB.open('toduDatabase_v2', 1);
+
+                    request.onupgradeneeded = function (event) {
+                        let db = event.target.result;
+                        if (!db.objectStoreNames.contains('todus')) {
+                            db.createObjectStore('todus', { keyPath: 'id', autoIncrement: true });
+                        }
+                    };
+                    request.onsuccess = (event) => {
+                        let db = event.target.result;
+                        let transaction = db.transaction(['todus'], 'readwrite');
+                        let objectStore = transaction.objectStore('todus');
+                        objectStore.delete(id);
+                        this.get_todu(this.id);
+
+                        transaction.oncomplete = function () {
+                            db.close();
+                        };
+                    }
+                    request.onerror = function (event) {
+                        console.error('Database failed to open:', event.target.errorCode);
+                    };
+                },
+                add_todu() {
+                    var todu = document.getElementById('get_todu').value;
+                    if (!todu) {
+                        return;
+                    }
+
+                    console.log("todu", todu);
+
+                    let request = indexedDB.open('toduDatabase_v2', 1);
+
+                    request.onupgradeneeded = function (event) {
+                        let db = event.target.result;
+                        if (!db.objectStoreNames.contains('todus')) {
+                            db.createObjectStore('todus', { keyPath: 'id', autoIncrement: true });
+                        }
+                    };
+
+                    request.onsuccess = (event) => {
+                        let db = event.target.result;
+                        let transaction = db.transaction(['todus'], 'readwrite');
+                        let objectStore = transaction.objectStore('todus');
+
+                        var add_todu = {
+                            user_id: this.id,
+                            todu: todu,
+                        };
+
+                        // If user doesn't exist, add it
+                        var addRequest = objectStore.add(add_todu);
+
+                        addRequest.onsuccess = function (event) {
+                            this.todu_num = this.todu_num + 1;
+                            console.log("user_id", this.id);
+                            console.log('added todu:', event.target.result);
+                        };
+
+                        addRequest.onerror = function (event) {
+                            console.log("Unable to add data: " + event.target.errorCode);
+                        };
+                        this.get_todu(this.id); // 重新获取待办事项
+
+                        transaction.oncomplete = () => {
+                            this.dialogVisible = false;
+                        };
+                    };
+
+                    request.onerror = function (event) {
+                        console.log("Database error: " + event.target.errorCode);
+                    };
+
+
+                },
+
+                change_info(change_nickname, change_signature, change_email) {
+                    console.log("change_info", this.studentNumber);
+                    if (change_nickname)
+                        this.nickname = change_nickname;
+                    if (change_signature)
+                        this.signature = change_signature;
+                    if (change_email)
+                        this.email = change_email;
+                    my_data = {
+                        username: this.username,
+                        email: this.email,
+                        studentNumber: this.studentNumber,
+                        avatarUrl: this.avatarUrl,
+                        nickname: this.nickname,
+                        signature: this.signature,
+                        todoList: ''
+                    }
+
+                    console.log("my_data", my_data);
+                    axios.put('/api/user/' + this.id, my_data)
+                        .then((response) => {
+                            // 处理成功的情况
+                            console.log(response.data);
+                            alert("修改成功");
+
+                        })
+                        .catch(function (error) {
+                            // 处理错误的情况
+                            console.log(error);
+                        })
+                },
+                get_experiments_pending() {
+                    console.log("获取未完成实验", this.id);
+                    axios.get('/api/experiments/no/' + this.id)
+                        .then((response) => {
+                            // 处理成功的情况
+                            this.pending = response.data;
+                            console.log("pendding", this.pending);
+                        })
+                        .catch(function (error) {
+                            // 处理错误的情况
+                            console.log(error);
+                        })
+                },
+                get_experiments_submitted() {
+                    console.log("获取已完成实验", this.id);
+                    axios.get('/api/experiments/ok/' + this.id)
+                        .then((response) => {
+                            // 处理成功的情况
+                            this.submitted = response.data;
+                            console.log("submitted", this.submitted);
+                        })
+                        .catch(function (error) {
+                            // 处理错误的情况
+                            console.log(error);
+                        })
+                }
+
+            }
+        })
+
+        $(document).ready(function () {
+
+            var user = {};
+            function show_user() {
+                const token = localStorage.getItem('jwt');
+                console.log("token", token);
+                // 发送 AJAX 请求获取用户信息
+                $.ajax({
+                    url: '/api/currentUser',
+                    method: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + token // 在请求头中附带 JWT
+                    },
+                    success: function (response) {
+                        console.log("response", response);
+                        const role = response.userType;
+                        var roleDisplay;
+                        user.id = response.id;
+                        user.username = response.username;
+
+                        user.email = response.email;
+                        user.studentNumber = response.studentNumber;
+                        user.avatarUrl = response.avatarUrl;
+
+                        user.nickname = response.nickname;
+                        user.signature = response.signature;
+                        // user.todoList = response.todoList;
+                        console.log('user', user);
+
+                        if (role === "TEACHER") {
+                            roleDisplay = "教师";
+                        } else if (role === "STUDENT") {
+                            roleDisplay = "学生";
+                        } else {
+                            roleDisplay = "游客";
+                        }
+
+                        app.show_info(response, roleDisplay);
+                        app.get_experiments_pending();
+                        app.get_experiments_submitted();
+                        updateRegistrationStatus();
+
+                    },
+                    error: function (xhr, status, error) {
+                        // 请求失败，不做额外处理，保持注册登录链接可见
+                    }
+                });
+            }
+            console.log("初始化");
+            show_user();
+
+            // 监听文件上传事件
+            document.getElementById('avatarUpload').addEventListener('change', function (event) {
+                console.log("点击更换头像")
+                const file = event.target.files[0];
+                if (!file) return;
+                save_avatar(file);
+            });
+            function save_avatar(avatar) {
+                console.log("修改的avatar");
+                // 创建一个 FormData 对象
+                const formData = new FormData();
+                // 将文件添加到 FormData 对象中
+                formData.append('file', avatar);
+                axios.post('/api/upload', formData)
+                    .then(function (response) {
+                        // 处理成功的情况
+                        console.log(response.data);
+                        my_data = {
+                            username: user.username,
+                            email: user.email,
+                            studentNumber: user.studentNumber,
+                            avatarUrl: response.data,
+                            nickname: user.nickname,
+                            signature: user.signature,
+                            todoList: ''
+                        }
+
+                        console.log(user);
+                        axios.put('/api/user/' + user.id, my_data)
+                            .then((response) => {
+                                // 处理成功的情况
+                                user.avatarUrl = my_data.avatarUrl;
+                                var imgElement = document.getElementById('avatar');
+                                imgElement.setAttribute('src', user.avatarUrl);
+
+                            })
+                            .catch(function (error) {
+                                // 处理错误的情况
+                                console.log(error);
+                            })
+                    })
+                    .catch(function (error) {
+                        // 处理错误的情况
+                        console.log(error);
+                    })
+            }
+
+        });
+        function out_change_info() {
+            var nickname = '';
+            if (document.getElementById('get_nickname'))
+                nickname = document.getElementById('get_nickname').value;
+            if (!nickname) {
+                if (document.getElementById('nickname'))
+                    nickname = document.getElementById('nickname').value;
+            }
+            else {
+                document.getElementById('nickname').textContent = nickname;
+            }
+            console.log("nickname", nickname);
+
+            var signature = '';
+            if (document.getElementById('get_signature'))
+                signature = document.getElementById('get_signature').value;
+            if (!signature) {
+                if (document.getElementById('signature'))
+                    signature = document.getElementById('signature').value;
+            }
+            else {
+                document.getElementById('signature').textContent = signature;
+
+            }
+            var email = '';
+            if (document.getElementById('get_email'))
+                email = document.getElementById('get_email').value;
+            if (!email) {
+                if (document.getElementById('email'))
+                    email = document.getElementById('email').value;
+            }
+            else {
+                document.getElementById('email').textContent = email;
+
+            }
+
+            app.change_info(nickname, signature, email);
+        }
+        function change_register() {
+            console.log('更改注册状态')
+            let isOpen = $('#registration-status').text() === '学生注册开放';
+            $.ajax({
+                url: '/api/config/student-registration',
+                method: 'POST',
+                data: { isOpen: !isOpen },
+                success: function () {
+                    updateRegistrationStatus();
+                },
+                error: function () {
+                    alert('无法更改注册状态');
+                }
+            });
+        }
+        function updateRegistrationStatus() {
+            $.ajax({
+                url: '/api/config/student-registration',
+                method: 'GET',
+                success: function (response_data) {
+                    console.log("data", response_data);
+                    if (response_data === true) {
+                        $('#registration-status').text('学生注册开放');
+                        $('#toggle-registration-btn').text('关闭注册');
+                    } else {
+                        $('#registration-status').text('学生注册关闭');
+                        $('#toggle-registration-btn').text('开放注册');
+                    }
+                },
+                error: function () {
+                    $('#registration-status').text('无法加载注册状态');
+                }
+            });
+        }
+
+
+
+    </script>
+
+
+</body>
+
+</html>

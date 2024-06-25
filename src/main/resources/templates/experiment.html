@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>实验问题平台首页</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/css/all.min.css}" rel="stylesheet">
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        li{
+            list-style: none;
+        }
+
+        .navbar{
+            display: flex;
+            height: 80px;
+            background-color: rgb(39, 39, 39);
+            align-items: center;
+            position: sticky;
+            z-index:10;
+            top: 0;
+        }
+        .navbar-brand{
+            font-size: 30px;
+            font-weight: bold;
+            color: white;
+            font-family: 'KaiTi';
+            margin-right:50px;
+        }
+
+        .navbar-nav a {
+            margin-right: 15px;
+        }
+
+        /* 页脚 */
+        .footer{
+            text-align: center;
+            margin: 20px;
+        }
+        .container{
+            display: flex;
+            width: 100%;
+            margin:0 auto;
+            padding: 0;
+            max-width: 100%;
+        }
+        /* 侧边栏 */
+        .container .aside-nav{
+            width: 15%;
+            background-color: rgb(235, 235, 235);
+
+        }
+        .container .aside-nav ul{
+            position: sticky;
+            top: 95px;
+        }
+        .container .aside-nav li{
+            margin: 15px 0;
+            margin-left: 30px;
+        }
+        .container .aside-nav a{
+            text-decoration: none;
+            color:rgb(20, 20, 22);
+        }
+        .container .aside-nav a:hover{
+            color:rgb(240, 6, 216);
+        }
+        .container .aside-nav .active{
+            color:rgb(240, 6, 216);
+        }
+        .container .main{
+            width: 60%;
+            margin:0 auto;
+        }
+        .container .main h2{
+            margin:10px;
+            text-align: center;
+        }
+        .experiment-list .select{
+            text-align: center;
+        }
+        .experiment-list .el-select{
+            margin:10px 0;
+
+        }
+        .main .content{
+            width: 100%;
+            background-color: white;
+            margin:0 auto;
+            box-shadow: 4px 4px 4px  rgba(0, 0, 0, 0.1);
+            border: 1px solid rgb(243, 241, 241);
+            text-align: center;
+        }
+        .notification .content{
+            width: 100%;
+            min-height: 600px;
+        }
+        .main .content .article{
+            width: 90%;
+            margin:0 auto;
+        }
+        .notification content .article{
+            width: 98%;
+        }
+        .main .content .form-group{
+            margin: 15px;
+            overflow: hidden;
+        }
+        .experiment-list .content .form-group{
+            margin :10px 0;
+        }
+        .notification .content .article .btn{
+            margin:10px 0;
+        }
+        .main .content .form-group .btn{
+            float: right;
+            margin-right:10px;
+            width: 60px;
+            height: 30px;
+            border: 1px solid rgb(189, 189, 189);
+            border-radius: 8px;
+            background-color: #0f987d;
+            color:white;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .main .content .form-group .btn-danger{
+            background-color: rgb(219, 32, 32);
+            font-size: 14px;
+        }
+        .main .content .form-group .btn-modify{
+            background-color: rgb(244, 210, 15);
+            font-size: 14px;
+        }
+        .main .content .form-group .btn:first-child{
+            margin-right:0 ;
+        }
+
+        .main .content .form-group .isContent{
+            width: 95.8%;
+            min-height: 400px;
+            margin-top: 10px;
+            padding:10px;
+            border: 1px solid rgb(189, 189, 189);
+            border-radius: 5px;
+        }
+        .delivery-notification .content .form-group .notificationContent{
+            resize:none;
+        }
+
+        .delivery-experiment .content .form-group .btn-danger{
+            margin-right: 0;
+        }
+        .notification .content .form-group .btn-danger{
+            margin-right: 0;
+        }
+        .main .content .form-group .title{
+            width: 40%;
+            height: 30px;
+            border: 1px solid rgb(189, 189, 189);
+            border-radius: 5px;
+            padding: 0 10px;
+        }
+        #experiment-media{
+            width:230px;
+        }
+        .delivery-experiment .content .form-group img{
+            width: 400px;
+            margin: 10px 0;
+        }
+        .delivery-experiment .content .form-group audio{
+            width: 400px;
+            margin: 10px 0;
+        }
+        .delivery-experiment .content .form-group video{
+            width: 400px;
+            margin: 10px 0;
+        }
+        .delivery-experiment .content .form-group p{
+            margin:10px 0;
+        }
+        #editor-container{
+            margin-top: 10px;
+            border: 1px solid rgb(189, 189, 189);
+            border-radius: 5px;
+        }
+         #editor {
+            height: 400px;
+        }
+        #editor-container2{
+            margin-top: 10px;
+            border: 1px solid rgb(189, 189, 189);
+            border-radius: 5px;
+        }
+        #editor2 {
+            height: 400px;
+        }
+
+
+        .notification .content .article textarea {
+            resize:none;
+            border: none;
+            text-align: center;
+            margin:0 5px;
+            font-size: 15px;
+            font-family: '微软雅黑';
+        }
+        .notification .content .article .notificationTitleHeader{
+            width: 20%;
+        }
+        .notification .content .article .notificationContentHeader{
+            width: 55%;
+        }
+        .notification .content .article .notificationTitle{
+            width: 20%;
+            height: 50px;
+            border: 1px solid rgb(189, 189, 189);
+            border-radius: 5px;
+            line-height:50px;
+        }
+        .notification .content .article .notificationContent{
+            width: 55%;
+            height: 50px;
+            border: 1px solid rgb(189, 189, 189);
+            border-radius: 5px;
+            line-height:50px;
+        }
+        .notification .content .article .operation{
+            width: 100px;
+        }
+        .label{
+            margin: 10px 0;
+        }
+
+    </style>
+</head>
+<body>
+<div id="app">
+    <!-- 页首 -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <!--    logo-->
+        <img src="/img/logo.jpg" alt="logo" style="width: 50px; height: 50px;">
+        <a class="navbar-brand" href="#">实验平台</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto" id="navItems">
+                <li class="nav-item">
+                    <a class="nav-link" href="/index">首页</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/experiment">实验问题</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/notification">课程通知</a>
+                </li>
+                <li class="nav-item" id = "testNavItem">
+                    <a class="nav-link" href="/test">自测题库</a>
+                </li>
+                <li class="nav-item" id="loginNavItem">
+                    <a class="nav-link" href="/login">注册登录</a>
+                </li>
+
+                <!--            <li class="nav-item" id="searchNavItem">-->
+                <!--                <form class="form-inline" th:action="@{/search}" method="get">-->
+                <!--                    <input class="form-control mr-sm-2" type="search" placeholder="搜索" aria-label="搜索" name="query">-->
+                <!--                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">搜索</button>-->
+                <!--                </form>-->
+                <!--            </li>-->
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 内容 -->
+    <div class="container">
+        <div class="aside-nav">
+            <ul v-if="!NotTeacher">
+                <li v-for="(item,index) in teacherNavItems" :key="item">
+                    <a href="javascript:;" :class="{ active: index === activeIndex}" @click="changeActive(index)" >{{ item }}</a>
+                </li>
+            </ul>
+            <ul v-else>
+                <li v-for="(item,index) in studentNavItems" :key="item">
+                    <a href="javascript:;" :class="{ active: index === activeIndex}" @click="changeActive(index)" >{{ item }}</a>
+                </li>
+            </ul>
+        </div>
+        <div class="main">
+            <div v-if="! NotTeacher">
+                <div class="experiment-list" v-if="activeIndex === 0">
+                    <h2>实验列表</h2>
+                    <div class="content">
+                        <div class="article">
+                            <div class="form-group mb-4">
+                            <div class="search-box mb-3">
+                            <label>
+                                <input class="form-control" v-model="searchQuery" @input="filterExperiments" placeholder="搜索实验...">
+                            </label>
+                            </div>
+                            </div>
+                        <div class="select">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                    <tr>
+                                        <th>实验标题</th>
+                                        <th>创建时间</th>
+                                        <th>状态</th>
+                                        <th>操作</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="item in filteredExperimentList" :key="item.id">
+                                        <td><a :href="'/experimentDetail/' + item.id">{{ item.title }}</a></td>
+                                        <td class="text-muted">{{ new Date(item.createdAt).toLocaleDateString() }}</td>
+                                        <td class="text-muted">{{ item.status }}</td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-danger btn-sm"  @click="deleteListExperiment(item.id)">删除</button>
+                                                <button type="button" class="btn btn-warning btn-sm" @click="modifyListExperiment(item)">修改</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 课程通知 -->
+                <div class="notification" v-else-if="activeIndex === 1">
+                    <h2>课程通知</h2>
+                    <div class="content">
+                        <div class="article">
+                            <div class="form-group mb-4">
+                                <div class="search-box mb-3">
+                                    <label>
+                                        <input class="form-control" v-model="searchQuery" @input="filterNotifications" placeholder="搜索通知...">
+                                    </label>
+                                </div>
+                            </div>
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th scope="col">标题</th>
+                                    <th scope="col">内容</th>
+                                    <th scope="col">操作</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr v-for="(item, index) in filteredNotificationList" :key="item.id">
+                                    <td>
+                                        <textarea class="form-control" rows="1">{{ item.title }}</textarea>
+                                    </td>
+                                    <td>
+                                        <textarea class="form-control" rows="1">{{ item.content }}</textarea>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group" aria-label="Notification Actions">
+                                        <button type="button" class="btn btn-danger btn-sm" :disabled="NotTeacher" @click="deleteNotification(item.id)">删除</button>
+                                        <button type="button" class="btn btn-primary btn-sm" :disabled="NotTeacher" @click="toModifyNotification(item)">修改</button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr v-if="filteredNotificationList.length === 0">
+                                    <td colspan="3" class="text-center">暂无通知</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- 发布通知 -->
+                <div class="delivery-notification" v-else-if="activeIndex === 2"  >
+                    <h2>通知发布</h2>
+                    <div class="content">
+                        <div class="article">
+                            <div class="form-group">
+                                <label for="notification">标题：</label>
+                                <input type="text" id="notification" v-model="notificationTitle" class="title">
+                            </div>
+                            <div class="form-group">
+                                内容:
+                                <br>
+                                <textarea class="notificationContent isContent" v-model="notificationContent"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <button type="button" class="btn btn-danger" @click="deleteNotificationInfo" >删除</button>
+                                <button type="button" class="btn btn-modify" :disabled="!notificationModifyFlag" @click="modifyNotification" >修改</button>
+                                <button type="button" class="btn " @click="saveNotificationInfo" >保存</button>
+                                <button type="button" class="btn " @click="publishNotification">发布</button>
+                            </div>
+                        </div>
+                    </div>
+    
+                </div>
+                <!-- 实验发布模块 -->
+                <div class="delivery-experiment" v-else-if="activeIndex === 3"  >
+                    <h2>实验发布</h2>
+                    <div class="content">
+                        <div class="article">
+                            <div class="form-group">
+                                <label for="experiment-title">标题：</label>
+                                <input type="text" id="experiment-title" v-model="experimentTitle" class="title">
+                            </div>
+                            <div class="form-group">
+                                内容:
+                                <br>
+                                <div id="editor-container">
+                                    <!-- 编辑器容器 -->
+                                    <div id="toolbar">
+                                        <!-- 工具栏容器 -->
+                                        <button class="ql-bold" title="加粗"></button>
+                                        <button class="ql-italic" title="斜体"></button>
+                                        <button class="ql-underline" title="下划线"></button>
+                                        <button class="ql-strike" title="删除线"></button>
+                                        <button class="ql-blockquote" title="引用"></button>
+                                        <button class="ql-code-block" title="代码块"></button>
+                                        <button class="ql-list" value="ordered" title="有序列表"></button>
+                                        <button class="ql-list" value="bullet" title="无序列表"></button>
+                                        <button class="ql-indent" value="-1" title="减少缩进"></button>
+                                        <button class="ql-indent" value="+1" title="增加缩进"></button>
+                                        <button class="ql-direction" value="rtl" title="右到左"></button>
+                                        <button class="ql-align ql-align-center" value="center" title="居中对齐"></button>
+                                        <button class="ql-align ql-align-justify" value="justify" title="两端对齐"></button>
+                                        <button class="ql-align ql-align-right" value="right" title="右对齐"></button>
+                                        <button class="ql-align ql-align-left" value="left" title="左对齐"></button>
+                                        <button class="ql-clean" title="清除格式"></button>
+                                    </div>
+                                    <div id="editor"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="experiment-media">文件上传：</label>
+                                <input type="file" id="experiment-media" multiple @change="handleFileChange" ref="experimentFiles">
+                                <button type="button" class="btn btn-danger" id="experiment-delete" @click="deleteExperiment">删除</button>
+                                <button type="button" class="btn btn-modify" :disabled="!modifyFlag" @click="modifyDeliveryExperiment">修改</button>
+                                <button type="button" class="btn btn-save" id="experiment-edit" @click="saveExperiment">保存</button>
+                                <button type="button" class="btn btn-primary" @click="deliveryExperiment">发布</button>
+                            </div>
+                            <div class="form-group">
+                                <p>预览</p>
+                                <ul class="experimnt-preview">
+                                    <li v-for="(file, index) in files" :key="file.name" @dragstart="dragStart(index)" @dragover.prevent @drop="drop(index)">
+                                        <img v-if="file.type.startsWith('image/')" :src="file.url" alt="Image" class="preview-img">
+                                        <audio v-else-if="file.type.startsWith('audio/')" controls class="preview-audio">
+                                            <source :src="file.url" type="audio/mp3">
+                                            您的浏览器不支持音频播放。
+                                        </audio>
+                                        <video v-else-if="file.type.startsWith('video/')" controls class="preview-video">
+                                            <source :src="file.url" type="video/mp4">
+                                            您的浏览器不支持视频播放。
+                                        </video>
+                                        <span v-else>{{ file.name }}</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 提交列表 -->
+                <div class="submission-list" v-else-if="activeIndex === 4">
+                    <h2>提交实验列表</h2>
+                    <div class="content">
+                        <div class="article">
+                            <div class="form-group mb-4">
+                            <div class="select mb-4">
+                                <el-select v-model="selectValue" placeholder="请选择实验" @change="getSubmissionList">
+                                    <el-option
+                                            v-for="item in experimentList"
+                                            :key="item.id"
+                                            :label="item.title"
+                                            :value="item.id">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                            </div>
+    
+                            <div class="select">
+                                <div class="search-box mb-4">
+                                    <label>
+                                        <input class="form-control" v-model="searchQuery" @input="filterSubmissions" placeholder="studentId搜索实验提交...">
+                                    </label>
+                                </div>
+                                <table class="table table-striped">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">提交ID</th>
+                                        <th scope="col">学生ID</th>
+                                        <th scope="col">状态</th>
+                                        <th scope="col">提交时间</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="item in filteredSubmissionList" :key="item.id">
+                                        <td><a :href="'/submissionDetail/' + item.id">{{ item.id }}</a></td>
+                                        <td>{{ item.studentId }}</td>
+                                        <td>{{ item.status }}</td>
+                                        <td>{{ new Date(item.submittedAt).toLocaleDateString() }}</td>
+                                    </tr>
+                                    <tr v-if="submissionList.length === 0 && selectValue !== ''">
+                                        <td colspan="4" class="text-center">暂无提交实验</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+    
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-else>
+                <!-- 实验列表 -->
+                <div class="experiment-list" v-if="activeIndex === 0">
+                    <h2>实验列表</h2>
+                    <div class="content">
+                        <div class="article">
+                            <div class="form-group mb-4">
+                            <div class="search-box mb-3">
+                            <label>
+                                <input class="form-control" v-model="searchQuery" @input="filterExperiments" placeholder="搜索实验...">
+                            </label>
+                            </div>
+                            </div>
+                        <div class="select">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                    <tr>
+                                        <th>实验标题</th>
+                                        <th>创建时间</th>
+                                        <th>状态</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="item in filteredExperimentList" :key="item.id">
+                                        <td><a :href="'/experimentDetail/' + item.id">{{ item.title }}</a></td>
+                                        <td class="text-muted">{{ new Date(item.createdAt).toLocaleDateString() }}</td>
+                                        <td class="text-muted">{{ item.status }}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="submit-experiment" v-else-if="activeIndex === 1">
+                    <h2>提交实验</h2>
+                    <div class="content">
+                        <div class="article">
+                            <div class="form-group mb-4">
+                            <div class="select">
+                                <el-select v-model="selectValue" placeholder="请选择实验">
+                                    <el-option
+                                            v-for="item in experimentList"
+                                            :key="item.id"
+                                            :label="item.title"
+                                            :value="item.id">
+                                    </el-option>
+                                </el-select>
+                            </div>
+                            </div>
+                            <form id="submission-form">
+                                <div class="form-group">
+                                    内容:
+                                    <br>
+                                    <div id="editor-container2">
+                                        <!-- 编辑器容器 -->
+                                        <div id="toolbar2">
+                                            <!-- 工具栏容器 -->
+                                            <button class="ql-bold" title="加粗"></button>
+                                            <button class="ql-italic" title="斜体"></button>
+                                            <button class="ql-underline" title="下划线"></button>
+                                            <button class="ql-strike" title="删除线"></button>
+                                            <button class="ql-blockquote" title="引用"></button>
+                                            <button class="ql-code-block" title="代码块"></button>
+                                            <button class="ql-list" value="ordered" title="有序列表"></button>
+                                            <button class="ql-list" value="bullet" title="无序列表"></button>
+                                            <button class="ql-indent" value="-1" title="减少缩进"></button>
+                                            <button class="ql-indent" value="+1" title="增加缩进"></button>
+                                            <button class="ql-direction" value="rtl" title="右到左"></button>
+                                            <button class="ql-align ql-align-center" value="center" title="居中对齐"></button>
+                                            <button class="ql-align ql-align-justify" value="justify" title="两端对齐"></button>
+                                            <button class="ql-align ql-align-right" value="right" title="右对齐"></button>
+                                            <button class="ql-align ql-align-left" value="left" title="左对齐"></button>
+                                            <button class="ql-clean" title="清除格式"></button>
+                                        </div>
+                                        <div id="editor2"></div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="submission-media">文件上传：</label>
+                                    <input type="file" id="submission-media" multiple @change="handleFileChange" ref="submissionFiles">
+                                    <button type="button" class="btn btn-primary" @click="deliverysubmission">提交</button>
+                                </div>
+                                <div class="form-group">
+                                    <p>预览</p>
+                                    <ul class="submission-preview">
+                                        <li v-for="(file, index) in files" :key="file.name" @dragstart="dragStart(index)" @dragover.prevent @drop="drop(index)">
+                                            <img v-if="file.type.startsWith('image/')" :src="file.url" alt="Image">
+                                            <audio v-else-if="file.type.startsWith('audio/')" controls>
+                                                <source :src="file.url" type="audio/mp3">
+                                                您的浏览器不支持音频播放。
+                                            </audio>
+                                            <video v-else-if="file.type.startsWith('video/')" controls>
+                                                <source :src="file.url" type="video/mp4">
+                                                您的浏览器不支持视频播放。
+                                            </video>
+                                            <span v-else>{{ file.name }}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+    
+                <!--提交列表-->
+                <div class="submission-list" v-else-if="activeIndex === 2">
+                    <h2>提交实验列表</h2>
+                    <div class="content">
+                        <div class="article">
+                            <div class="select">
+                                <table class="table table-striped">
+                                    <thead>
+                                    <tr>
+                                        <th scope="col">提交ID</th>
+                                        <th scope="col">状态</th>
+                                        <th scope="col">提交时间</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr v-for="item in studentSubmissionList" :key="item.id">
+                                        <td><a :href="'/submissionDetail/' + item.id">{{ item.id }}</a></td>
+                                        <td>{{ item.status }}</td>
+                                        <td>{{ new Date(item.submittedAt).toLocaleDateString() }}</td>
+                                    </tr>
+                                    <tr v-if="submissionList.length === 0 && selectValue !== ''">
+                                        <td colspan="4" class="text-center">暂无提交实验</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+    
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        © 2024 实验平台. 保留所有权利.
+    </footer>
+</div>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+
+<script th:src="@{/js/jquery-3.7.1.min.js}"></script>
+<script th:src="@{/js/popper.min.js}"></script>
+<script th:src="@{/js/bootstrap.min.js}"></script>
+<script th:src="@{/js/showUser.js}"></script>
+
+<script>
+    //添加请求拦截器
+    axios.interceptors.request.use(function (config) {
+        // 在发送请求之前做些什么
+        const token = localStorage.getItem('jwt')
+        if(token){
+             //有token则添加到请求头
+            config.headers.Authorization = 'Bearer ' + localStorage.getItem('jwt');
+        }
+        return config;
+    }, function (error) {
+        // 对请求错误做些什么
+        return Promise.reject(error);
+    });
+    // 添加响应拦截器
+    axios.interceptors.response.use(
+        function (response) {
+            return response;
+        },
+        function (error) {
+            // 超出 2xx 范围的状态码都会触发该函数。
+            // 对响应错误做点什么
+            if (error.response) {
+                if (error.response.status === 401) {
+                    //token过期错误则跳回首页
+                    location.href = '/index'
+                    alert('token过期')
+                    return;
+                }
+                alert('请求失败')
+            } else {
+                alert('网络异常')
+            }
+            return Promise.reject(error)
+        }
+    )
+    const app = new Vue({
+        el: '#app',
+        data: {
+            role:'',
+            NotTeacher : false,
+            NotStudent : false,
+            filteredExperimentList: [],
+            filteredNotificationList: [],
+            filteredSubmissionList: [],
+            searchQuery: '',
+            teacherNavItems:['实验列表','课程通知','通知发布','实验发布','提交列表'],
+            studentNavItems:['实验列表','提交实验','提交列表'],
+            activeIndex:0,//所点击导航下标
+            token:'',
+            experimentList:[],//实验信息列表
+            submissionList:[],//提交实验列表
+            selectValue: '',//提交列表界面选择的实验id
+            files:[],//根据filesOrigin生成的文件信息
+            filesOrigin:[],//选择的多媒体文件
+            URLS:[],//服务器返回的文件URL
+            filesTypes:[],//文件类型
+            experimentTitle:'',//实验发布界面实验标题
+            experimentContent:'',//实验发布界面实验内容
+            submissionContent:'',//提交实验内容
+            experimentTitleShow:'',//实验列表界面实验标题
+            experimentContentShow:'',//实验列表界面实验内容
+            submissionContentShow:'',//提交实验内容
+            experimentId:0,//选中的实验ID
+            id:0,//实验ID
+            teacherId : 0,//教师ID
+            studentId:0,//学生ID
+            createdAt : '',//实验创建时间
+            updatedAt : '',//实验更新时间
+            status : '',//实验状态
+            draggedItemIndex: -1, // 初始化为 -1，表示没有文件被拖拽
+            quill:null, //编辑器
+            modifyFlag:false, //实验发布界面修改按钮标志
+            notificationList:[],//通知列表
+            notificationTitle:'',//通知标题
+            notificationContent:'',//通知内容
+            notificationModifyFlag:false,//通知发布界面修改按钮标志
+            noTeacherId:0,//教师ID
+            notificationId:0,//通知ID
+            notificationCreatedAt:'',//通知创建时间
+            notificationUpdatedAt:'',//通知更新时间
+            userName:'',
+            studentSubmissionList:[] //学生提交列表
+        },
+        methods:{
+            filterExperiments() {
+                const query = this.searchQuery.toLowerCase();
+                this.filteredExperimentList = this.experimentList.filter(item => {
+                    return item.title.toLowerCase().includes(query);
+                });
+            },
+            filterNotifications() {
+                const query = this.searchQuery.toLowerCase();
+                this.filteredNotificationList = this.notificationList.filter(item => {
+                    return item.title.toLowerCase().includes(query);
+                });
+            },
+            filterSubmissions() {
+                const query = this.searchQuery.toLowerCase();
+                this.filteredSubmissionList = this.submissionList.filter(item => {
+                    return item.studentId.toString().toLowerCase().includes(query);
+                });
+            },
+            //获取当前jwt
+            getToken(){
+                this.token = localStorage.getItem('jwt');
+                this.role = localStorage.getItem('role');
+                if (this.role !== 'TEACHER') {
+                    this.studentId = localStorage.getItem('userId')
+                    this.NotTeacher = true;
+                }
+                if (this.role !== 'STUDENT') {
+                    this.NotStudent = true;
+                }
+            },
+            changeActive(index){
+                this.activeIndex = index;
+            },
+            //获取整个实验信息
+            async getExperimentList(){
+                const res = await axios({
+                    method:'get',
+                    url:'/api/experiments',
+                })
+                this.experimentList = res.data;
+                this.filteredExperimentList = this.experimentList;
+                console.log(this.experimentList);
+            },
+
+            // 获取某个实验的所有提交信息
+            async getSubmissionList() {
+                console.log(this.experimentList);
+                if (this.selectValue !== '') {
+                    const res = await axios({
+                        method: 'get',
+                        url: '/api/submissions/experiment/' + this.selectValue,
+                    })
+                    this.submissionList = res.data;
+                    this.filteredSubmissionList = this.submissionList;
+                    console.log(this.submissionList);
+                } else {
+                    this.selectValue = this.experimentList[0].id;
+                }
+            },
+
+            //处理选择的文件
+            handleFileChange(e){
+                this.filesOrigin = Array.from(e.target.files);
+                this.files = Array.from(e.target.files).map(file => ({
+                    name: file.name,
+                    type: file.type,
+                    url: URL.createObjectURL(file) // 获取本地 URL
+                }));
+            },
+            //拖拽
+            dragStart(index) {
+                this.draggedItemIndex = index;
+            },
+            drop(index) {
+                //原files文件更改
+                const draggedFileOrigin = this.filesOrigin[this.draggedItemIndex];
+                this.filesOrigin.splice(this.draggedItemIndex, 1);
+                this.filesOrigin.splice(index, 0, draggedFileOrigin);
+                //视图files修改
+                const draggedFile = this.files[this.draggedItemIndex];
+                this.files.splice(this.draggedItemIndex, 1);
+                this.files.splice(index, 0, draggedFile);
+                this.draggedItemIndex = -1;
+            },
+            //保存实验信息
+            saveExperiment(){
+                localStorage.setItem('experimentTitle',this.experimentTitle);
+                localStorage.setItem('experimentContent',this.experimentContent);
+                alert('实验信息保存成功');
+            },
+            //删除实验信息
+            deleteExperiment(){
+                this.experimentTitle='';
+                this.experimentContent='';
+                this.quill.root.innerHTML='';
+                this.files=[];
+                this.filesOrigin=[];
+                this.$refs.experimentFiles.value = ''
+                localStorage.removeItem('experimentTitle');
+                localStorage.removeItem('experimentContent');
+                alert('实验信息删除成功');
+            },
+            //发布实验
+            async deliveryExperiment(){
+                if(!this.experimentTitle || !this.experimentContent){
+                    alert('请填写完整');
+                    return;
+                }
+                console.log(this.token);
+                const res = await axios({
+                    method:'post',
+                    url:'/api/experiments',
+
+                    data:{
+                        title:this.experimentTitle,
+                        content:this.experimentContent,
+                        status: '接收提交'
+                    }
+                })
+                const id = res.data.id;
+                if(this.filesOrigin.length>0){
+                    for (const file of Array.from(this.filesOrigin)) {
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        const res = await axios.post('/api/experiments/upload', formData, {
+                            headers: { 'Content-Type': 'multipart/form-data' }
+                        });
+                        this.URLS.push(res.data)
+                        this.filesTypes.push(file.type)
+                        if(this.URLS.length===this.filesOrigin.length){
+                            let num = 0
+                            for (const url of Array.from(this.URLS)) {
+                                const index = Array.from(this.URLS).indexOf(url);
+                                const res = await axios({
+                                    method:'post',
+                                    url:`/api/experiments/${id}/media`,
+                                    data:{
+                                        url:url,
+                                        type:this.filesTypes[index]
+                                    }
+                                })
+                                num++;
+                                if(num===this.filesOrigin.length){
+                                    this.getExperimentList();
+                                    alert('实验发布成功')
+                                    this.experimentTitle = '';this.experimentContent = '';
+                                    this.URLS = [];this.filesTypes = [];
+                                    this.filesOrigin = [];this.files = [];
+                                    this.$refs.experimentFiles.value = '';
+                                    this.modifyFlag = false;
+                                    if(localStorage.getItem('experimentTitle')!==null){
+                                        localStorage.removeItem('experimentTitle');
+                                    }
+                                    if(localStorage.getItem('experimentContent')!==null){
+                                        localStorage.removeItem('experimentContent');
+                                    }
+                                    this.experimentTitleShow = '';
+                                    this.experimentContentShow = '';this.activeIndex = 0;
+                                }
+                            }
+                        }
+                    }
+
+                }
+                else{
+                    alert('实验发布成功')
+                    this.getExperimentList();
+                    this.experimentTitle = '';
+                    this.experimentContent = '';
+                    this.experimentTitleShow = '';
+                    this.experimentContentShow = '';
+                    this.modifyFlag = false;
+                    if(localStorage.getItem('experimentTitle')!==null){
+                        localStorage.removeItem('experimentTitle');
+                    }
+                    if(localStorage.getItem('experimentContent')!==null){
+                        localStorage.removeItem('experimentContent');
+                    }
+                    this.activeIndex = 0;
+                }
+            },
+
+            // 提交实验
+            async deliverysubmission(){
+                console.log(this.token);
+                const res = await axios({
+                    method:'post',
+                    url:'/api/submissions',
+                    data:{
+                        experimentId: this.selectValue,
+                        answer: this.submissionContent,
+                    }
+                })
+                const id = res.data.id;
+                if(this.filesOrigin.length>0){
+                    for (const file of Array.from(this.filesOrigin)) {
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        const res = await axios.post('/api/submissions/upload', formData, {
+                            headers: { 'Content-Type': 'multipart/form-data' }
+                        });
+                        this.URLS.push(res.data)
+                        this.filesTypes.push(file.type)
+                        if(this.URLS.length===this.filesOrigin.length){
+                            let num = 0
+                            for (const url of Array.from(this.URLS)) {
+                                const index = Array.from(this.URLS).indexOf(url);
+                                const res = await axios({
+                                    method:'post',
+                                    url:`/api/submissions/${id}/media`,
+                                    data:{
+                                        url:url,
+                                        type:this.filesTypes[index]
+                                    }
+                                })
+                                num++;
+                                if(num===this.filesOrigin.length){
+                                    alert('实验提交成功')
+                                    this.submissionContent = '';
+                                    this.URLS = [];this.filesTypes = [];
+                                    this.filesOrigin = [];this.files = [];
+                                    this.$refs.submissionFiles.value = '';
+                                    this.modifyFlag = false;
+                                    if(localStorage.getItem('experimentId')!==null){
+                                        localStorage.removeItem('experimentId');
+                                    }
+                                    if(localStorage.getItem('submissionContent')!==null){
+                                        localStorage.removeItem('submissionContent');
+                                    }
+                                    this.getStudentSubmissionList()
+                                }
+                            }
+                        }
+                    }
+
+                }
+                else{
+                    alert('实验提交成功')
+                    this.submissionContent = '';
+                    this.URLS = [];this.filesTypes = [];
+                    this.filesOrigin = [];this.files = [];
+                    this.$refs.submissionFiles.value = '';
+                    this.modifyFlag = false;
+                    if(localStorage.getItem('experimentId')!==null){
+                        localStorage.removeItem('experimentId');
+                    }
+                    if(localStorage.getItem('submissionContent')!==null){
+                        localStorage.removeItem('submissionContent');
+                    }
+                    this.getStudentSubmissionList()
+                }
+            },
+
+
+            //跳转到实验发布页面进行实验修改
+            modifyListExperiment(item){
+                this.modifyFlag = true;
+                this.id = item.id;
+                this.teacherId = item.teacherId;
+                this.status = item.status;
+                this.createdAt = item.createdAt;
+                this.updatedAt = item.updatedAt;
+                this.experimentTitleShow = item.title;
+                this.experimentContentShow = item.content;
+                this.experimentTitle = this.experimentTitleShow;
+                this.experimentContent = this.experimentContentShow;
+                this.activeIndex = 3;
+            },
+            // 修改实验
+            async modifyDeliveryExperiment(){
+                const res = await axios.put(`/api/experiments/${this.id}`,{
+                    title:this.experimentTitle,
+                    content:this.experimentContent,
+                    id : this.id,
+                    teacherId:this.teacherId,
+                    status:this.status,
+                    createdAt:this.createdAt,
+                    updatedAt:this.updatedAt
+                })
+                // 先删除原有的文件
+                const res2 = await axios.delete(`/api/experiments/${this.id}/media`)
+                console.log(res2);
+                // 上传新的文件
+                const id = this.id;
+                if(this.filesOrigin.length>0) {
+                    for (const file of Array.from(this.filesOrigin)) {
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        const res = await axios.post('/api/experiments/upload', formData, {
+                            headers: {'Content-Type': 'multipart/form-data'}
+                        });
+                        this.URLS.push(res.data)
+                        this.filesTypes.push(file.type)
+                        if (this.URLS.length === this.filesOrigin.length) {
+                            let num = 0
+                            for (const url of Array.from(this.URLS)) {
+                                const index = Array.from(this.URLS).indexOf(url);
+                                const res = await axios({
+                                    method: 'post',
+                                    url: `/api/experiments/${id}/media`,
+                                    data: {
+                                        url: url,
+                                        type: this.filesTypes[index]
+                                    }
+                                })
+                                num++;
+                                if (num === this.filesOrigin.length) {
+                                    this.getExperimentList();
+                                    this.experimentTitle = '';
+                                    this.experimentContent = '';
+                                    this.URLS = [];
+                                    this.filesTypes = [];
+                                    this.filesOrigin = [];
+                                    this.files = [];
+                                    this.$refs.experimentFiles.value = '';
+                                    this.modifyFlag = false;
+                                    if (localStorage.getItem('experimentTitle') !== null) {
+                                        localStorage.removeItem('experimentTitle');
+                                    }
+                                    if (localStorage.getItem('experimentContent') !== null) {
+                                        localStorage.removeItem('experimentContent');
+                                    }
+                                    this.experimentTitleShow = '';
+                                    this.experimentContentShow = '';
+                                    this.activeIndex = 0;
+                                }
+                            }
+                        }
+                    }
+                }
+                this.experimentTitle = '';this.experimentContent = '';
+                this.quill.root.innerHTML = '';this.modifyFlag = false;
+                this.experimentContentShow = '';this.experimentTitleShow = '';
+                this.getExperimentList();
+                this.activeIndex = 0;
+                alert('实验修改成功');
+            },
+            // 删除实验
+            async deleteListExperiment(id){
+                const res = await axios.delete(`/api/experiments/${id}`)
+                this.experimentTitleShow = '';
+                this.experimentContentShow = '';
+                this.getExperimentList();
+                alert('实验删除成功')
+            },
+            //获取通知列表
+            async getNotificationList(){
+                const res = await axios.get('/api/notifications')
+                this.notificationList = res.data;
+                this.filteredNotificationList = this.notificationList;
+            },
+            //保存通知信息
+            saveNotificationInfo(){
+                localStorage.setItem('notificationTitle',this.notificationTitle);
+                localStorage.setItem('notificationContent',this.notificationContent);
+                alert('通知信息保存成功');
+            },
+            //删除通知信息
+            deleteNotificationInfo(){
+                this.notificationTitle='';
+                this.notificationContent='';
+                localStorage.removeItem('notificationTitle');
+                localStorage.removeItem('notificationContent');
+                alert('通知信息删除成功');
+            },
+            //发布通知
+            async publishNotification(){
+                if(this.notificationTitle!==''&&this.notificationContent!==''){
+                    const res = await axios.post('/api/notifications',{
+                        title:this.notificationTitle,
+                        content:this.notificationContent
+                    })
+                    this.notificationTitle = '';
+                    this.notificationContent = '';
+                    this.getNotificationList();
+                    this.activeIndex = 1;
+                    this.notificationModifyFlag = false;
+                    alert('通知发布成功')
+                }
+                else{
+                    alert('请输入通知标题和内容')
+                }
+            },
+            //跳转到通知发布页面进行通知修改
+            toModifyNotification(item){
+                this.notificationModifyFlag = true;
+                this.notificationTitle = item.title;
+                this.notificationContent = item.content;
+                this.notificationId = item.id;
+                this.noTeacherId = item.teacherId;
+                this.activeIndex = 2;
+            },
+            //修改通知
+            async modifyNotification(){
+                const res = await axios.put(`/api/notifications/${this.notificationId}`,{
+                    title:this.notificationTitle,
+                    content:this.notificationContent,
+                    teacherId:this.noTeacherId,
+                    id:this.notificationId,
+                    createdAt:this.notificationCreatedAt,
+                    updatedAt:this.notificationUpdatedAt
+                })
+                console.log(res);
+                this.notificationTitle = '';
+                this.notificationContent = '';
+                this.notificationModifyFlag = false;
+                this.getNotificationList();
+                this.activeIndex = 1;
+                alert('通知修改成功')
+            },
+            // 删除通知
+            async deleteNotification(id){
+                const res = await axios.delete(`/api/notifications/${id}`)
+                this.getNotificationList();
+                alert('通知删除成功')
+            },
+            async getStudentSubmissionList(){
+                const res = await axios.get(`/api/submissions/student/${this.studentId}`)
+                this.studentSubmissionList = res.data;
+                console.log(res);
+            }
+
+        },
+        async created(){
+            this.getToken();
+            if(this.studentId){
+                this.getStudentSubmissionList();
+            }
+            this.getExperimentList();
+            this.getNotificationList();
+
+            if(localStorage.getItem('experimentTitle')){
+                this.experimentTitle = localStorage.getItem('experimentTitle');
+            }
+            if(localStorage.getItem('experimentContent')){
+                this.experimentContent = localStorage.getItem('experimentContent');
+            }
+            if(localStorage.getItem('notificationTitle')){
+                this.notificationTitle = localStorage.getItem('notificationTitle');
+            }
+            if(localStorage.getItem('notificationContent')){
+                this.notificationContent = localStorage.getItem('notificationContent');
+            }
+            if(localStorage.getItem('userName')){
+                this.userName = localStorage.getItem('userName');
+            }
+        },
+        updated(){
+            if(this.activeIndex===3 && !this.NotTeacher){
+                this.quill = new Quill('#editor', {
+                    modules: {
+                        toolbar: '#toolbar'  // 工具栏容器
+                    },
+                    placeholder: '请输入内容...',  // 占位符文本
+                    theme: 'snow'  // 主题样式
+                });
+                this.quill.root.innerHTML = this.experimentContent;
+                this.quill.on('text-change', () => {
+                    // 监听编辑器内容变化
+                    this.experimentContent = this.quill.root.innerHTML;
+                });
+            }
+            if (this.activeIndex === 1 && !this.NotStudent){
+                this.quill = new Quill('#editor2', {
+                    modules: {
+                        toolbar: '#toolbar2'  // 工具栏容器
+                    },
+                    placeholder: '请输入内容...',  // 占位符文本
+                    theme: 'snow'  // 主题样式
+                });
+                this.quill.root.innerHTML = this.submissionContent;
+                this.quill.on('text-change', () => {
+                    // 监听编辑器内容变化
+                    this.submissionContent = this.quill.root.innerHTML;
+                });
+            }
+        },
+        watch: {
+            selectValue: async function (newVal) {
+                if(newVal!==''){
+                    const res = await axios({
+                        url:`/api/experiments/${newVal}`
+                    })
+                    this.experimentContentShow = res.data.content
+                    this.experimentTitleShow = res.data.title
+                    this.id = res.data.id
+                    this.teacherId = res.data.teacherId
+                    this.createdAt = res.data.createdAt
+                    this.updatedAt = res.data.updatedAt
+                    this.status = res.data.status
+                }
+            }
+        }
+    })
+</script>
+</body>
+</html>
